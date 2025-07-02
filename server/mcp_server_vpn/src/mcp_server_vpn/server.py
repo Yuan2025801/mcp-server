@@ -1,8 +1,12 @@
+import base64
+import json
 import logging
 import os
 from typing import Any
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp import FastMCP, Context
+from mcp.server.session import ServerSession
+from starlette.requests import Request
 
 from .resource.vpn_resource import VPNSDK
 
@@ -14,12 +18,30 @@ logger = logging.getLogger(__name__)
 
 mcp = FastMCP("VPN MCP Server", port=int(os.getenv("PORT", "8000")))
 
-vpn_resource = VPNSDK(
-    region=os.getenv("VOLCENGINE_REGION"),
-    ak=os.getenv("VOLCENGINE_ACCESS_KEY"),
-    sk=os.getenv("VOLCENGINE_SECRET_KEY"),
-    host=os.getenv("VOLCENGINE_ENDPOINT"),
-)
+
+def _read_sts() -> dict:
+    """Read STS credentials from the request header or environment."""
+    ctx: Context[ServerSession, object] = mcp.get_context()
+    req: Request | None = ctx.request_context.request
+    auth = (req.headers.get("authorization") if req else None) or os.getenv(
+        "authorization"
+    )
+    if not auth:
+        raise ValueError("Missing authorization")
+    _, b64 = auth.split(" ", 1) if " " in auth else ("", auth)
+    decoded = base64.b64decode(b64)
+    return json.loads(decoded)
+
+
+def _get_vpn_resource() -> VPNSDK:
+    """Create a VPNSDK instance using STS credentials."""
+    creds = _read_sts()
+    return VPNSDK(
+        region=os.getenv("VOLCENGINE_REGION"),
+        ak=creds.get("AccessKeyId"),
+        sk=creds.get("SecretAccessKey"),
+        host=os.getenv("VOLCENGINE_ENDPOINT"),
+    )
 
 
 @mcp.tool(name="describe_vpn_connection", description="查询指定的IPsec连接详情")
@@ -29,6 +51,7 @@ def describe_vpn_connection(vpn_connection_id: str) -> dict[str, Any]:
     Args:
         vpn_connection_id: IPsec 连接的ID。
     """
+    vpn_resource = _get_vpn_resource()
     req = {"VpnConnectionId": vpn_connection_id}
     resp = vpn_resource.describe_vpn_connection_attributes(req)
     return resp.to_dict()
