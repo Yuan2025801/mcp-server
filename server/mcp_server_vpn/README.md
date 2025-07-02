@@ -2,6 +2,13 @@
 
 Skeleton MCP server for VPN related tools. Functionality will be added in future versions.
 
+## Tools
+
+### `describe_vpn_connection`
+
+- **详细描述**：查询指定的 IPsec 连接详情。
+- **触发示例**：`"查看 IPsec 连接 vpn-123 的状态"`
+
 ## Installation
 
 ### System requirements
