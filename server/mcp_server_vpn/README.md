@@ -77,6 +77,42 @@ python -m mcp_server_vpn.main --transport sse
 
 SSE communicates using HTTP Server-Sent Events and requires the server to listen on a port, while STDIO interacts directly through standard input and output, which is more convenient for local debugging.
 
+## MCP Integration
+
+To add this server to your MCP configuration, add the following to your MCP settings file:
+
+```json
+{
+  "mcpServers": {
+    "mcp-server-vpn": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_vpn",
+        "mcp-server-vpn"
+      ],
+      "env": {
+        "VOLCENGINE_ACCESS_KEY": "your-access-key",
+        "VOLCENGINE_SECRET_KEY": "your-secret-key",
+        "VOLCENGINE_REGION": "your-resource-region",
+        "VOLCENGINE_ENDPOINT": "api-endpoint",
+        "PORT": "8000"
+      }
+    }
+  }
+}
+
+```
+
+### 环境变量
+
+| 环境变量 | 描述 | 必填 | 默认值 |
+| --- | --- | --- | --- |
+| VOLCENGINE_ENDPOINT | 火山引擎 OpenAPI Endpoint | 否 | - |
+| VOLCENGINE_REGION | 火山引擎 VortexIP Region | 是 | - |
+| VOLCENGINE_ACCESS_KEY | 火山引擎账号 ACCESS KEY | 是 | - |
+| VOLCENGINE_SECRET_KEY | 火山引擎账号 SECRET KEY | 是 | - |
+
 ## License
 
 volcengine/mcp-server is licensed under the MIT License.
