@@ -8,7 +8,7 @@ from mcp.server.fastmcp import FastMCP, Context
 from mcp.server.session import ServerSession
 from starlette.requests import Request
 
-from .resource.vpn_resource import VPNSDK
+from .clients import VPNClient
 
 logging.basicConfig(
     level=logging.INFO,
@@ -33,10 +33,10 @@ def _read_sts() -> dict:
     return json.loads(decoded)
 
 
-def _get_vpn_resource() -> VPNSDK:
-    """Create a VPNSDK instance using STS credentials."""
+def _get_vpn_client() -> VPNClient:
+    """Create a VPN client instance using STS credentials."""
     creds = _read_sts()
-    return VPNSDK(
+    return VPNClient(
         region=os.getenv("VOLCENGINE_REGION"),
         ak=creds.get("AccessKeyId"),
         sk=creds.get("SecretAccessKey"),
@@ -51,7 +51,7 @@ def describe_vpn_connection(vpn_connection_id: str) -> dict[str, Any]:
     Args:
         vpn_connection_id: IPsec 连接的ID。
     """
-    vpn_resource = _get_vpn_resource()
+    vpn_client = _get_vpn_client()
     req = {"VpnConnectionId": vpn_connection_id}
-    resp = vpn_resource.describe_vpn_connection_attributes(req)
+    resp = vpn_client.describe_vpn_connection_attributes(req)
     return resp.to_dict()
