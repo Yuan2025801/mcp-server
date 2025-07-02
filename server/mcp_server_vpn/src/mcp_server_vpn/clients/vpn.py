@@ -6,7 +6,7 @@ from volcenginesdkvpn.models import (
 )
 
 
-class VPNSDK:
+class VPNClient:
     """Simple wrapper around the volcenginesdk VPN client."""
 
     def __init__(
