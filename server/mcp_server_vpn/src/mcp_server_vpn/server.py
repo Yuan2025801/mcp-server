@@ -18,7 +18,7 @@ from .clients import VPNClient
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s [%(filename)s:%(lineno)d]",
 )
 logger = logging.getLogger(__name__)
 
@@ -43,7 +43,8 @@ def _get_vpn_client() -> VPNClient:
     """Create a VPN client instance using STS credentials."""
     creds = _read_sts()
     return VPNClient(
-        region=os.getenv("VOLCENGINE_REGION"),
+        region="beijing",
+        # region=os.getenv("VOLCENGINE_REGION"),
         ak=creds.get("AccessKeyId"),
         sk=creds.get("SecretAccessKey"),
         host=os.getenv("VOLCENGINE_ENDPOINT"),
@@ -61,8 +62,12 @@ def describe_vpn_connection(
     """
     vpn_client = _get_vpn_client()
     req = DescribeVpnConnectionAttributesRequest(vpn_connection_id=vpn_connection_id)
-    resp = vpn_client.describe_vpn_connection_attributes(req)
-    return resp
+    try:
+        resp = vpn_client.describe_vpn_connection_attributes(req)
+        return resp
+    except Exception:
+        logger.exception("Error calling describe_vpn_connection")
+        raise
 
 
 @mcp.tool(name="describe_vpn_gateway", description="查询指定的VPN网关详情")
@@ -72,5 +77,9 @@ def describe_vpn_gateway(
     """查询指定 VPN 网关的详情。"""
     vpn_client = _get_vpn_client()
     req = DescribeVpnGatewayAttributesRequest(vpn_gateway_id=vpn_gateway_id)
-    resp = vpn_client.describe_vpn_gateway_attributes(req)
-    return resp
+    try:
+        resp = vpn_client.describe_vpn_gateway_attributes(req)
+        return resp
+    except Exception:
+        logger.exception("Error calling describe_vpn_gateway")
+        raise
