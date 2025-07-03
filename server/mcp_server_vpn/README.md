@@ -9,6 +9,12 @@ Skeleton MCP server for VPN related tools. Functionality will be added in future
 - **详细描述**：查询指定的 IPsec 连接详情。
 - **触发示例**：`"查看 IPsec 连接 vpn-123 的状态"`
 
+
+### `describe_vpn_gateway`
+
+- **详细描述**：查询指定的 VPN 网关详情。
+- **触发示例**：`"查看 VPN 网关 vgw-123 的状态"`
+
 ## Installation
 
 ### System requirements

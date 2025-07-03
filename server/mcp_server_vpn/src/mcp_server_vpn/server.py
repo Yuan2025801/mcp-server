@@ -2,7 +2,13 @@ import base64
 import json
 import logging
 import os
-from typing import Any
+
+from volcenginesdkvpn.models import (
+    DescribeVpnConnectionAttributesRequest,
+    DescribeVpnConnectionAttributesResponse,
+    DescribeVpnGatewayAttributesRequest,
+    DescribeVpnGatewayAttributesResponse,
+)
 
 from mcp.server.fastmcp import FastMCP, Context
 from mcp.server.session import ServerSession
@@ -45,13 +51,26 @@ def _get_vpn_client() -> VPNClient:
 
 
 @mcp.tool(name="describe_vpn_connection", description="查询指定的IPsec连接详情")
-def describe_vpn_connection(vpn_connection_id: str) -> dict[str, Any]:
+def describe_vpn_connection(
+    vpn_connection_id: str,
+) -> DescribeVpnConnectionAttributesResponse:
     """查询指定的 IPsec 连接详情。
 
     Args:
         vpn_connection_id: IPsec 连接的ID。
     """
     vpn_client = _get_vpn_client()
-    req = {"VpnConnectionId": vpn_connection_id}
+    req = DescribeVpnConnectionAttributesRequest(VpnConnectionId=vpn_connection_id)
     resp = vpn_client.describe_vpn_connection_attributes(req)
-    return resp.to_dict()
+    return resp
+
+
+@mcp.tool(name="describe_vpn_gateway", description="查询指定的VPN网关详情")
+def describe_vpn_gateway(
+    vpn_gateway_id: str,
+) -> DescribeVpnGatewayAttributesResponse:
+    """查询指定 VPN 网关的详情。"""
+    vpn_client = _get_vpn_client()
+    req = DescribeVpnGatewayAttributesRequest(VpnGatewayId=vpn_gateway_id)
+    resp = vpn_client.describe_vpn_gateway_attributes(req)
+    return resp
