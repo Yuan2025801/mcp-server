@@ -60,7 +60,7 @@ def describe_vpn_connection(
         vpn_connection_id: IPsec 连接的ID。
     """
     vpn_client = _get_vpn_client()
-    req = DescribeVpnConnectionAttributesRequest(VpnConnectionId=vpn_connection_id)
+    req = DescribeVpnConnectionAttributesRequest(vpn_connection_id=vpn_connection_id)
     resp = vpn_client.describe_vpn_connection_attributes(req)
     return resp
 
@@ -71,6 +71,6 @@ def describe_vpn_gateway(
 ) -> DescribeVpnGatewayAttributesResponse:
     """查询指定 VPN 网关的详情。"""
     vpn_client = _get_vpn_client()
-    req = DescribeVpnGatewayAttributesRequest(VpnGatewayId=vpn_gateway_id)
+    req = DescribeVpnGatewayAttributesRequest(vpn_gateway_id=vpn_gateway_id)
     resp = vpn_client.describe_vpn_gateway_attributes(req)
     return resp
