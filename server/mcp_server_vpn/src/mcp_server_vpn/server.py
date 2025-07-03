@@ -18,7 +18,7 @@ from .clients import VPNClient
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s [%(filename)s:%(lineno)d]",
 )
 logger = logging.getLogger(__name__)
 
@@ -61,8 +61,12 @@ def describe_vpn_connection(
     """
     vpn_client = _get_vpn_client()
     req = DescribeVpnConnectionAttributesRequest(VpnConnectionId=vpn_connection_id)
-    resp = vpn_client.describe_vpn_connection_attributes(req)
-    return resp
+    try:
+        resp = vpn_client.describe_vpn_connection_attributes(req)
+        return resp
+    except Exception:
+        logger.exception("Error calling describe_vpn_connection")
+        raise
 
 
 @mcp.tool(name="describe_vpn_gateway", description="查询指定的VPN网关详情")
@@ -72,5 +76,9 @@ def describe_vpn_gateway(
     """查询指定 VPN 网关的详情。"""
     vpn_client = _get_vpn_client()
     req = DescribeVpnGatewayAttributesRequest(VpnGatewayId=vpn_gateway_id)
-    resp = vpn_client.describe_vpn_gateway_attributes(req)
-    return resp
+    try:
+        resp = vpn_client.describe_vpn_gateway_attributes(req)
+        return resp
+    except Exception:
+        logger.exception("Error calling describe_vpn_gateway")
+        raise
