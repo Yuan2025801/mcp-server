@@ -19,11 +19,18 @@ class VPNClient:
         ak: str | None = None,
         sk: str | None = None,
         host: str | None = None,
+        session_token: str | None = None,
+        timeout: int = 5,
+        max_retries: int = 3,
     ):
         configuration = volcenginesdkcore.Configuration()
         configuration.ak = ak
         configuration.sk = sk
         configuration.region = region
+        if session_token is not None:
+            configuration.session_token = session_token
+        configuration.timeout = timeout
+        configuration.max_retries = max_retries
         if host is not None:
             configuration.host = host
         self.client = VPNApi(volcenginesdkcore.ApiClient(configuration))
