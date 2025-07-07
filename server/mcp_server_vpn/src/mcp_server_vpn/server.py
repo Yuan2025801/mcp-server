@@ -40,10 +40,10 @@ def _read_sts() -> dict:
     return json.loads(decoded)
 
 
-def _get_vpn_client() -> VPNClient:
+def _get_vpn_client(region: str | None = None) -> VPNClient:
     """Create a VPN client instance using STS credentials."""
     return VPNClient(
-        region=os.getenv("VOLCENGINE_REGION"),
+        region=region or os.getenv("VOLCENGINE_REGION"),
         ak=os.getenv("VOLCENGINE_ACCESS_KEY"),
         sk=os.getenv("VOLCENGINE_SECRET_KEY"),
         host=os.getenv("VOLCENGINE_ENDPOINT"),
@@ -53,13 +53,14 @@ def _get_vpn_client() -> VPNClient:
 @mcp.tool(name="describe_vpn_connection", description="查询指定的IPsec连接详情")
 def describe_vpn_connection(
     vpn_connection_id: str,
+    region: str | None = None,
 ) -> DescribeVpnConnectionAttributesResponse:
     """查询指定的 IPsec 连接详情。
 
     Args:
         vpn_connection_id: IPsec 连接的ID。
     """
-    vpn_client = _get_vpn_client()
+    vpn_client = _get_vpn_client(region=region)
     req = DescribeVpnConnectionAttributesRequest(vpn_connection_id=vpn_connection_id)
     try:
         resp = vpn_client.describe_vpn_connection_attributes(req)
@@ -72,9 +73,10 @@ def describe_vpn_connection(
 @mcp.tool(name="describe_vpn_gateway", description="查询指定的VPN网关详情")
 def describe_vpn_gateway(
     vpn_gateway_id: str,
+    region: str | None = None,
 ) -> DescribeVpnGatewayAttributesResponse:
     """查询指定 VPN 网关的详情。"""
-    vpn_client = _get_vpn_client()
+    vpn_client = _get_vpn_client(region=region)
     req = DescribeVpnGatewayAttributesRequest(vpn_gateway_id=vpn_gateway_id)
     try:
         resp = vpn_client.describe_vpn_gateway_attributes(req)
@@ -91,9 +93,10 @@ def describe_vpn_connections(
     vpn_gateway_id: str | None = None,
     vpn_connection_name: str | None = None,
     status: str | None = None,
+    region: str | None = None,
 ) -> DescribeVpnConnectionsResponse:
     """查询IPsec连接列表。"""
-    vpn_client = _get_vpn_client()
+    vpn_client = _get_vpn_client(region=region)
     req = DescribeVpnConnectionsRequest(
         page_number=page_number,
         page_size=page_size,
