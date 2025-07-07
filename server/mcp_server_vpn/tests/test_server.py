@@ -143,3 +143,25 @@ def test_describe_vpn_connection_error(monkeypatch):
     monkeypatch.setattr(server, '_get_vpn_client', lambda region=None: StubClient(Exception('boom')))
     result = asyncio.run(server.describe_vpn_connection('id'))
     assert isinstance(result, CallToolResult) and result.isError
+
+
+def test_get_vpn_client_missing_vars(monkeypatch):
+    monkeypatch.delenv('VOLCENGINE_ACCESS_KEY', raising=False)
+    monkeypatch.delenv('VOLCENGINE_SECRET_KEY', raising=False)
+    monkeypatch.delenv('VOLCENGINE_REGION', raising=False)
+    monkeypatch.setattr(server, '_read_sts', lambda: {})
+
+    class DummyClient:
+        def __init__(self, **kwargs):
+            pass
+
+    monkeypatch.setattr(server, 'VPNClient', DummyClient)
+    server._CLIENT_CACHE = {}
+    with pytest.raises(ValueError, match="Missing required credentials"):
+        server._get_vpn_client()
+
+
+def test_describe_vpn_connection_missing_creds(monkeypatch):
+    monkeypatch.setattr(server, '_get_vpn_client', lambda region=None: (_ for _ in ()).throw(ValueError('Missing required credentials')))
+    result = asyncio.run(server.describe_vpn_connection('id'))
+    assert isinstance(result, CallToolResult) and result.isError

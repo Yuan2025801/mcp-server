@@ -62,6 +62,15 @@ def _get_vpn_client(region: str | None = None) -> VPNClient:
     session_token = creds.get("SessionToken") or os.getenv("VOLCENGINE_SESSION_TOKEN")
     region = region or os.getenv("VOLCENGINE_REGION")
     host = os.getenv("VOLCENGINE_ENDPOINT")
+    if not ak or not sk or not region:
+        missing = []
+        if not ak:
+            missing.append("AccessKeyId")
+        if not sk:
+            missing.append("SecretAccessKey")
+        if not region:
+            missing.append("Region")
+        raise ValueError(f"Missing required credentials: {', '.join(missing)}")
     key = (ak, region)
 
     client = _CLIENT_CACHE.get(key)
@@ -95,11 +104,16 @@ async def describe_vpn_connection(
     vpn_connection_id: str,
     region: str | None = None,
 ) -> DescribeVpnConnectionAttributesResponse | CallToolResult:
-    vpn_client = _get_vpn_client(region=region)
     req = DescribeVpnConnectionAttributesRequest(vpn_connection_id=vpn_connection_id)
     try:
+        vpn_client = _get_vpn_client(region=region)
         resp = vpn_client.describe_vpn_connection_attributes(req)
         return resp
+    except ValueError as exc:
+        return CallToolResult(
+            isError=True,
+            content=[TextContent(type="text", text=f"凭证缺失：{exc}")],
+        )
     except Exception as exc:
         logger.exception("Error calling describe_vpn_connection")
         return CallToolResult(
@@ -124,11 +138,16 @@ async def describe_vpn_gateway(
     vpn_gateway_id: str,
     region: str | None = None,
 ) -> DescribeVpnGatewayAttributesResponse | CallToolResult:
-    vpn_client = _get_vpn_client(region=region)
     req = DescribeVpnGatewayAttributesRequest(vpn_gateway_id=vpn_gateway_id)
     try:
+        vpn_client = _get_vpn_client(region=region)
         resp = vpn_client.describe_vpn_gateway_attributes(req)
         return resp
+    except ValueError as exc:
+        return CallToolResult(
+            isError=True,
+            content=[TextContent(type="text", text=f"凭证缺失：{exc}")],
+        )
     except Exception as exc:
         logger.exception("Error calling describe_vpn_gateway")
         return CallToolResult(
@@ -157,7 +176,6 @@ async def describe_vpn_connections(
     status: str | None = None,
     region: str | None = None,
 ) -> DescribeVpnConnectionsResponse | CallToolResult:
-    vpn_client = _get_vpn_client(region=region)
     req = DescribeVpnConnectionsRequest(
         page_number=page_number,
         page_size=page_size,
@@ -166,8 +184,14 @@ async def describe_vpn_connections(
         status=status,
     )
     try:
+        vpn_client = _get_vpn_client(region=region)
         resp = vpn_client.describe_vpn_connections(req)
         return resp
+    except ValueError as exc:
+        return CallToolResult(
+            isError=True,
+            content=[TextContent(type="text", text=f"凭证缺失：{exc}")],
+        )
     except Exception as exc:
         logger.exception("Error calling describe_vpn_connections")
         return CallToolResult(
