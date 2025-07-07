@@ -3,6 +3,8 @@ from volcenginesdkvpn.api.vpn_api import VPNApi
 from volcenginesdkvpn.models import (
     DescribeVpnConnectionAttributesRequest,
     DescribeVpnConnectionAttributesResponse,
+    DescribeVpnConnectionsRequest,
+    DescribeVpnConnectionsResponse,
     DescribeVpnGatewayAttributesRequest,
     DescribeVpnGatewayAttributesResponse,
 )
@@ -37,3 +39,9 @@ class VPNClient:
     ) -> DescribeVpnGatewayAttributesResponse:
         """Query details of a specific VPN gateway."""
         return self.client.describe_vpn_gateway_attributes(request)
+
+    def describe_vpn_connections(
+        self, request: DescribeVpnConnectionsRequest
+    ) -> DescribeVpnConnectionsResponse:
+        """Query a list of VPN connections."""
+        return self.client.describe_vpn_connections(request)
