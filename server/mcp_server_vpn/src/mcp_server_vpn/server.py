@@ -1,4 +1,5 @@
 import base64
+import binascii
 import json
 import logging
 import os
@@ -15,6 +16,8 @@ from volcenginesdkvpn.models import (
     DescribeVpnGatewayAttributesResponse,
 )
 
+from mcp.types import CallToolResult, TextContent, ToolAnnotations
+
 from .clients import VPNClient
 
 logging.basicConfig(
@@ -28,7 +31,7 @@ mcp = FastMCP("VPN MCP Server", port=int(os.getenv("PORT", "8000")))
 
 def _read_sts() -> dict:
     """Read STS credentials from the request header or environment."""
-    ctx: Context[ServerSession, object] = mcp.get_context()
+    ctx: Context[ServerSession, object, Request] = mcp.get_context()
     req: Request | None = ctx.request_context.request
     auth = (req.headers.get("authorization") if req else None) or os.getenv(
         "authorization"
@@ -40,61 +43,125 @@ def _read_sts() -> dict:
     return json.loads(decoded)
 
 
+_CLIENT_CACHE: dict[tuple[str | None, str | None], VPNClient] = {}
+
+
 def _get_vpn_client(region: str | None = None) -> VPNClient:
-    """Create a VPN client instance using STS credentials."""
-    return VPNClient(
-        region=region or os.getenv("VOLCENGINE_REGION"),
-        ak=os.getenv("VOLCENGINE_ACCESS_KEY"),
-        sk=os.getenv("VOLCENGINE_SECRET_KEY"),
-        host=os.getenv("VOLCENGINE_ENDPOINT"),
-    )
+    """Create or reuse a VPN client instance using STS credentials."""
+    creds = {}
+    try:
+        creds = _read_sts()
+    except (ValueError, binascii.Error, json.JSONDecodeError):
+        # Fallback to environment variables when STS header missing
+        pass
+
+    ak = creds.get("AccessKeyId") or os.getenv("VOLCENGINE_ACCESS_KEY")
+    sk = creds.get("SecretAccessKey") or os.getenv("VOLCENGINE_SECRET_KEY")
+    session_token = creds.get("SessionToken") or os.getenv("VOLCENGINE_SESSION_TOKEN")
+    region = region or os.getenv("VOLCENGINE_REGION")
+    host = os.getenv("VOLCENGINE_ENDPOINT")
+    key = (ak, region)
+
+    client = _CLIENT_CACHE.get(key)
+    if client is None:
+        client = VPNClient(
+            region=region,
+            ak=ak,
+            sk=sk,
+            host=host,
+            session_token=session_token,
+            timeout=5,
+            max_retries=3,
+        )
+        _CLIENT_CACHE[key] = client
+    return client
 
 
-@mcp.tool(name="describe_vpn_connection", description="查询指定的IPsec连接详情")
-def describe_vpn_connection(
+@mcp.tool(
+    name="describe_vpn_connection",
+    description=(
+        '查询指定的IPsec连接详情。\n\n示例：{"vpn_connection_id":"vgc-xxx","region":"cn-beijing"}'
+    ),
+    annotations=ToolAnnotations(
+        title="Query VPN Connection / 查询 VPN 连接详情",
+        readOnlyHint=True,
+        idempotentHint=True,
+        openWorldHint=True,
+    ),
+)
+async def describe_vpn_connection(
     vpn_connection_id: str,
     region: str | None = None,
-) -> DescribeVpnConnectionAttributesResponse:
+) -> DescribeVpnConnectionAttributesResponse | CallToolResult:
     """查询指定的 IPsec 连接详情。
 
     Args:
         vpn_connection_id: IPsec 连接的ID。
+        region: 地域。
     """
     vpn_client = _get_vpn_client(region=region)
     req = DescribeVpnConnectionAttributesRequest(vpn_connection_id=vpn_connection_id)
     try:
         resp = vpn_client.describe_vpn_connection_attributes(req)
         return resp
-    except Exception:
+    except Exception as exc:
         logger.exception("Error calling describe_vpn_connection")
-        raise
+        return CallToolResult(
+            isError=True,
+            content=[TextContent(type="text", text=f"查询失败：{exc}")],
+        )
 
 
-@mcp.tool(name="describe_vpn_gateway", description="查询指定的VPN网关详情")
-def describe_vpn_gateway(
+@mcp.tool(
+    name="describe_vpn_gateway",
+    description=(
+        '查询指定的VPN网关详情。\n\n示例：{"vpn_gateway_id":"vgw-xxx","region":"cn-beijing"}'
+    ),
+    annotations=ToolAnnotations(
+        title="Query VPN Gateway / 查询 VPN 网关详情",
+        read_only_hint=True,
+        idempotent_hint=True,
+        open_world_hint=True,
+    )
+)
+async def describe_vpn_gateway(
     vpn_gateway_id: str,
     region: str | None = None,
-) -> DescribeVpnGatewayAttributesResponse:
+) -> DescribeVpnGatewayAttributesResponse | CallToolResult:
     """查询指定 VPN 网关的详情。"""
     vpn_client = _get_vpn_client(region=region)
     req = DescribeVpnGatewayAttributesRequest(vpn_gateway_id=vpn_gateway_id)
     try:
         resp = vpn_client.describe_vpn_gateway_attributes(req)
         return resp
-    except Exception:
+    except Exception as exc:
         logger.exception("Error calling describe_vpn_gateway")
-        raise
+        return CallToolResult(
+            isError=True,
+            content=[TextContent(type="text", text=f"查询失败：{exc}")],
+        )
 
 
-@mcp.tool(name="describe_vpn_connections", description="查询满足条件的IPsec连接")
-def describe_vpn_connections(
+@mcp.tool(
+    name="describe_vpn_connections",
+    description=(
+        '查询满足条件的IPsec连接。\n\n示例：{"vpn_gateway_id":"vgw-xxx","page_size":10}'
+    ),
+    annotations=ToolAnnotations(
+        title="Query VPN Connections / 查询 VPN 连接列表",
+        read_only_hint=True,
+        idempotent_hint=True,
+        open_world_hint=True,
+    )
+)
+async def describe_vpn_connections(
     page_number: int | None = None,
     page_size: int | None = None,
     vpn_gateway_id: str | None = None,
     vpn_connection_name: str | None = None,
     status: str | None = None,
     region: str | None = None,
-) -> DescribeVpnConnectionsResponse:
+) -> DescribeVpnConnectionsResponse | CallToolResult:
     """查询IPsec连接列表。"""
     vpn_client = _get_vpn_client(region=region)
     req = DescribeVpnConnectionsRequest(
@@ -107,6 +174,9 @@ def describe_vpn_connections(
     try:
         resp = vpn_client.describe_vpn_connections(req)
         return resp
-    except Exception:
+    except Exception as exc:
         logger.exception("Error calling describe_vpn_connections")
-        raise
+        return CallToolResult(
+            isError=True,
+            content=[TextContent(type="text", text=f"查询失败：{exc}")],
+        )
