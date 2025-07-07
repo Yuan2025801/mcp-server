@@ -8,8 +8,20 @@ import asyncio
 core = types.ModuleType('volcenginesdkcore')
 core.Configuration = type('Configuration', (), {})
 core.ApiClient = object
+core.rest = types.ModuleType('rest')
+core.rest.ApiException = type('ApiException', (Exception,), {})
 vpn_mod = types.ModuleType('volcenginesdkvpn')
 vpn_api_mod = types.ModuleType('volcenginesdkvpn.api.vpn_api')
+
+# Stub urllib3 HTTPError
+urllib3_mod = types.ModuleType('urllib3')
+urllib3_exceptions = types.ModuleType('urllib3.exceptions')
+class DummyHTTPError(Exception):
+    pass
+urllib3_exceptions.HTTPError = DummyHTTPError
+urllib3_mod.exceptions = urllib3_exceptions
+sys.modules['urllib3'] = urllib3_mod
+sys.modules['urllib3.exceptions'] = urllib3_exceptions
 
 
 class DummyApi: pass
@@ -34,6 +46,7 @@ models_mod.DescribeVpnConnectionsResponse = Resp
 models_mod.DescribeVpnGatewayAttributesRequest = BaseReq
 models_mod.DescribeVpnGatewayAttributesResponse = Resp
 sys.modules['volcenginesdkcore'] = core
+sys.modules['volcenginesdkcore.rest'] = core.rest
 sys.modules['volcenginesdkvpn'] = vpn_mod
 sys.modules['volcenginesdkvpn.api'] = types.ModuleType('api')
 sys.modules['volcenginesdkvpn.api.vpn_api'] = vpn_api_mod
@@ -90,6 +103,11 @@ class TextContent:
 
 types_mod.CallToolResult = CallToolResult
 types_mod.TextContent = TextContent
+class ToolAnnotations:
+    def __init__(self, **kwargs):
+        pass
+
+types_mod.ToolAnnotations = ToolAnnotations
 sys.modules['mcp.types'] = types_mod
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
@@ -104,13 +122,14 @@ class StubClient:
     def describe_vpn_connection_attributes(self, req):
         if self.exc:
             raise self.exc
-        return 'ok'
+        from mcp_server_vpn.clients.models import DescribeVpnConnectionAttributesResponse
+        return DescribeVpnConnectionAttributesResponse(Message="ok")
 
 
 def test_describe_vpn_connection_success(monkeypatch):
     monkeypatch.setattr(server, '_get_vpn_client', lambda region=None: StubClient())
     result = asyncio.run(server.describe_vpn_connection('id'))
-    assert result == 'ok'
+    assert result.Message == 'ok'
 
 
 def test_describe_vpn_connection_error(monkeypatch):
