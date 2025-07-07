@@ -3,16 +3,17 @@ import json
 import logging
 import os
 
+from mcp.server.fastmcp import Context, FastMCP
+from mcp.server.session import ServerSession
+from starlette.requests import Request
 from volcenginesdkvpn.models import (
     DescribeVpnConnectionAttributesRequest,
     DescribeVpnConnectionAttributesResponse,
+    DescribeVpnConnectionsRequest,
+    DescribeVpnConnectionsResponse,
     DescribeVpnGatewayAttributesRequest,
     DescribeVpnGatewayAttributesResponse,
 )
-
-from mcp.server.fastmcp import FastMCP, Context
-from mcp.server.session import ServerSession
-from starlette.requests import Request
 
 from .clients import VPNClient
 
@@ -82,4 +83,29 @@ def describe_vpn_gateway(
         return resp
     except Exception:
         logger.exception("Error calling describe_vpn_gateway")
+        raise
+
+
+@mcp.tool(name="describe_vpn_connections", description="查询满足条件的IPsec连接")
+def describe_vpn_connections(
+    page_number: int | None = None,
+    page_size: int | None = None,
+    vpn_gateway_id: str | None = None,
+    vpn_connection_name: str | None = None,
+    status: str | None = None,
+) -> DescribeVpnConnectionsResponse:
+    """查询IPsec连接列表。"""
+    vpn_client = _get_vpn_client()
+    req = DescribeVpnConnectionsRequest(
+        page_number=page_number,
+        page_size=page_size,
+        vpn_gateway_id=vpn_gateway_id,
+        vpn_connection_name=vpn_connection_name,
+        status=status,
+    )
+    try:
+        resp = vpn_client.describe_vpn_connections(req)
+        return resp
+    except Exception:
+        logger.exception("Error calling describe_vpn_connections")
         raise
