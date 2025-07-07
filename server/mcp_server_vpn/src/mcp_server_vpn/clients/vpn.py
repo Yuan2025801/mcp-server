@@ -6,11 +6,14 @@ from volcenginesdkcore.rest import ApiException
 from volcenginesdkvpn.api.vpn_api import VPNApi
 from volcenginesdkvpn.models import (
     DescribeVpnConnectionAttributesRequest,
-    DescribeVpnConnectionAttributesResponse,
     DescribeVpnConnectionsRequest,
-    DescribeVpnConnectionsResponse,
     DescribeVpnGatewayAttributesRequest,
+)
+
+from .models import (
+    DescribeVpnConnectionAttributesResponse,
     DescribeVpnGatewayAttributesResponse,
+    DescribeVpnConnectionsResponse,
 )
 
 
@@ -54,17 +57,32 @@ class VPNClient:
                     raise
                 time.sleep(self._backoff * 2 ** (i - 1))
 
+    @staticmethod
+    def _wrap(resp, model_cls):
+        if hasattr(resp, "to_dict"):
+            data = resp.to_dict()
+        elif hasattr(resp, "model_dump"):
+            data = resp.model_dump()
+        elif isinstance(resp, dict):
+            data = resp
+        else:
+            data = getattr(resp, "__dict__", {})
+        return model_cls(**data)
+
     def describe_vpn_connection_attributes(
         self, request: DescribeVpnConnectionAttributesRequest
     ) -> DescribeVpnConnectionAttributesResponse:
-        return self._call(self.client.describe_vpn_connection_attributes, request)
+        resp = self._call(self.client.describe_vpn_connection_attributes, request)
+        return self._wrap(resp, DescribeVpnConnectionAttributesResponse)
 
     def describe_vpn_gateway_attributes(
         self, request: DescribeVpnGatewayAttributesRequest
     ) -> DescribeVpnGatewayAttributesResponse:
-        return self._call(self.client.describe_vpn_gateway_attributes, request)
+        resp = self._call(self.client.describe_vpn_gateway_attributes, request)
+        return self._wrap(resp, DescribeVpnGatewayAttributesResponse)
 
     def describe_vpn_connections(
         self, request: DescribeVpnConnectionsRequest
     ) -> DescribeVpnConnectionsResponse:
-        return self._call(self.client.describe_vpn_connections, request)
+        resp = self._call(self.client.describe_vpn_connections, request)
+        return self._wrap(resp, DescribeVpnConnectionsResponse)

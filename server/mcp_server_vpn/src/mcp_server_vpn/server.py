@@ -9,16 +9,18 @@ from mcp.server.session import ServerSession
 from starlette.requests import Request
 from volcenginesdkvpn.models import (
     DescribeVpnConnectionAttributesRequest,
-    DescribeVpnConnectionAttributesResponse,
     DescribeVpnConnectionsRequest,
-    DescribeVpnConnectionsResponse,
     DescribeVpnGatewayAttributesRequest,
-    DescribeVpnGatewayAttributesResponse,
 )
 
 from mcp.types import CallToolResult, TextContent, ToolAnnotations
 
 from .clients import VPNClient
+from .clients.models import (
+    DescribeVpnGatewayAttributesResponse,
+    DescribeVpnConnectionsResponse,
+    DescribeVpnConnectionAttributesResponse,
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -93,12 +95,6 @@ async def describe_vpn_connection(
     vpn_connection_id: str,
     region: str | None = None,
 ) -> DescribeVpnConnectionAttributesResponse | CallToolResult:
-    """查询指定的 IPsec 连接详情。
-
-    Args:
-        vpn_connection_id: IPsec 连接的ID。
-        region: 地域。
-    """
     vpn_client = _get_vpn_client(region=region)
     req = DescribeVpnConnectionAttributesRequest(vpn_connection_id=vpn_connection_id)
     try:
@@ -128,7 +124,6 @@ async def describe_vpn_gateway(
     vpn_gateway_id: str,
     region: str | None = None,
 ) -> DescribeVpnGatewayAttributesResponse | CallToolResult:
-    """查询指定 VPN 网关的详情。"""
     vpn_client = _get_vpn_client(region=region)
     req = DescribeVpnGatewayAttributesRequest(vpn_gateway_id=vpn_gateway_id)
     try:
@@ -162,7 +157,6 @@ async def describe_vpn_connections(
     status: str | None = None,
     region: str | None = None,
 ) -> DescribeVpnConnectionsResponse | CallToolResult:
-    """查询IPsec连接列表。"""
     vpn_client = _get_vpn_client(region=region)
     req = DescribeVpnConnectionsRequest(
         page_number=page_number,
