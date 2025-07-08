@@ -12,6 +12,7 @@ from volcenginesdkvpn.models import (
     DescribeVpnConnectionsRequest,
     DescribeVpnGatewayAttributesRequest,
     DescribeVpnGatewaysRequest,
+    DescribeVpnGatewayRouteAttributesRequest,
 )
 
 from mcp.types import CallToolResult, TextContent, ToolAnnotations
@@ -22,6 +23,7 @@ from .clients.models import (
     DescribeVpnConnectionsResponse,
     DescribeVpnConnectionAttributesResponse,
     DescribeVpnGatewaysResponse,
+    DescribeVpnGatewayRouteAttributesResponse,
 )
 
 logging.basicConfig(
@@ -152,6 +154,40 @@ async def describe_vpn_gateway(
         )
     except Exception as exc:
         logger.exception("Error calling describe_vpn_gateway")
+        return CallToolResult(
+            isError=True,
+            content=[TextContent(type="text", text=f"查询失败：{exc}")],
+        )
+
+
+@mcp.tool(
+    name="describe_vpn_gateway_route",
+    description=(
+        '查询指定的VPN网关路由条目详情。\n\n示例：{"vpn_gateway_route_id":"vgr-xxx","region":"cn-beijing"}'
+    ),
+    annotations=ToolAnnotations(
+        title="Query VPN Gateway Route / 查询 VPN 网关路由详情",
+        read_only_hint=True,
+        idempotent_hint=True,
+        open_world_hint=True,
+    ),
+)
+async def describe_vpn_gateway_route(
+    vpn_gateway_route_id: str,
+    region: str | None = None,
+) -> DescribeVpnGatewayRouteAttributesResponse | CallToolResult:
+    req = DescribeVpnGatewayRouteAttributesRequest(vpn_gateway_route_id=vpn_gateway_route_id)
+    try:
+        vpn_client = _get_vpn_client(region=region)
+        resp = vpn_client.describe_vpn_gateway_route_attributes(req)
+        return resp
+    except ValueError as exc:
+        return CallToolResult(
+            isError=True,
+            content=[TextContent(type="text", text=f"凭证缺失：{exc}")],
+        )
+    except Exception as exc:
+        logger.exception("Error calling describe_vpn_gateway_route")
         return CallToolResult(
             isError=True,
             content=[TextContent(type="text", text=f"查询失败：{exc}")],
