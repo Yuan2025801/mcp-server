@@ -3,6 +3,7 @@ from .models import (
     DescribeVpnConnectionAttributesResponse,
     DescribeVpnGatewayAttributesResponse,
     DescribeVpnConnectionsResponse,
+    DescribeVpnGatewaysResponse,
 )
 
 __all__ = [
@@ -10,4 +11,5 @@ __all__ = [
     "DescribeVpnConnectionAttributesResponse",
     "DescribeVpnGatewayAttributesResponse",
     "DescribeVpnConnectionsResponse",
+    "DescribeVpnGatewaysResponse",
 ]

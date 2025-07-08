@@ -20,6 +20,11 @@ Skeleton MCP server for VPN related tools. Functionality will be added in future
 - **详细描述**：查询满足条件的 IPsec 连接列表。
 - **触发示例**：`"列出所有 IPsec 连接"`
 
+### `describe_vpn_gateways`
+
+- **详细描述**：查询满足条件的 VPN 网关列表。
+- **触发示例**：`"列出所有 VPN 网关"`
+
 ## Installation
 
 ### System requirements
