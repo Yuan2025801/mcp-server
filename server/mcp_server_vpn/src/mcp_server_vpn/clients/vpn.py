@@ -10,6 +10,7 @@ from volcenginesdkvpn.models import (
     DescribeVpnGatewayAttributesRequest,
     DescribeVpnGatewaysRequest,
     DescribeVpnGatewayRouteAttributesRequest,
+    DescribeVpnGatewayRoutesRequest,
 )
 
 from .models import (
@@ -18,6 +19,7 @@ from .models import (
     DescribeVpnConnectionsResponse,
     DescribeVpnGatewaysResponse,
     DescribeVpnGatewayRouteAttributesResponse,
+    DescribeVpnGatewayRoutesResponse,
 )
 
 
@@ -104,3 +106,9 @@ class VPNClient:
             self.client.describe_vpn_gateway_route_attributes, request
         )
         return self._wrap(resp, DescribeVpnGatewayRouteAttributesResponse)
+
+    def describe_vpn_gateway_routes(
+        self, request: DescribeVpnGatewayRoutesRequest
+    ) -> DescribeVpnGatewayRoutesResponse:
+        resp = self._call(self.client.describe_vpn_gateway_routes, request)
+        return self._wrap(resp, DescribeVpnGatewayRoutesResponse)
