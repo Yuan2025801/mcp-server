@@ -19,3 +19,7 @@ class DescribeVpnGatewayAttributesResponse(BaseResponseModel):
 
 class DescribeVpnConnectionsResponse(BaseResponseModel):
     pass
+
+
+class DescribeVpnGatewaysResponse(BaseResponseModel):
+    pass

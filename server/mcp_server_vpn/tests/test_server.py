@@ -49,6 +49,8 @@ models_mod.DescribeVpnConnectionsRequest = BaseReq
 models_mod.DescribeVpnConnectionsResponse = Resp
 models_mod.DescribeVpnGatewayAttributesRequest = BaseReq
 models_mod.DescribeVpnGatewayAttributesResponse = Resp
+models_mod.DescribeVpnGatewaysRequest = BaseReq
+models_mod.DescribeVpnGatewaysResponse = Resp
 sys.modules['volcenginesdkcore'] = core
 sys.modules['volcenginesdkcore.rest'] = core.rest
 sys.modules['volcenginesdkvpn'] = vpn_mod
@@ -132,6 +134,12 @@ class StubClient:
         from mcp_server_vpn.clients.models import DescribeVpnConnectionAttributesResponse
         return DescribeVpnConnectionAttributesResponse(Message="ok")
 
+    def describe_vpn_gateways(self, req):
+        if self.exc:
+            raise self.exc
+        from mcp_server_vpn.clients.models import DescribeVpnGatewaysResponse
+        return DescribeVpnGatewaysResponse(Message="ok")
+
 
 def test_describe_vpn_connection_success(monkeypatch):
     monkeypatch.setattr(server, '_get_vpn_client', lambda region=None: StubClient())
@@ -164,4 +172,16 @@ def test_get_vpn_client_missing_vars(monkeypatch):
 def test_describe_vpn_connection_missing_creds(monkeypatch):
     monkeypatch.setattr(server, '_get_vpn_client', lambda region=None: (_ for _ in ()).throw(ValueError('Missing required credentials')))
     result = asyncio.run(server.describe_vpn_connection('id'))
+    assert isinstance(result, CallToolResult) and result.isError
+
+
+def test_describe_vpn_gateways_success(monkeypatch):
+    monkeypatch.setattr(server, '_get_vpn_client', lambda region=None: StubClient())
+    result = asyncio.run(server.describe_vpn_gateways())
+    assert result.Message == 'ok'
+
+
+def test_describe_vpn_gateways_error(monkeypatch):
+    monkeypatch.setattr(server, '_get_vpn_client', lambda region=None: StubClient(Exception('boom')))
+    result = asyncio.run(server.describe_vpn_gateways())
     assert isinstance(result, CallToolResult) and result.isError

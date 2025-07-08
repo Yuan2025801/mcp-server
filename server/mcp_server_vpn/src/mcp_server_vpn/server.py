@@ -11,6 +11,7 @@ from volcenginesdkvpn.models import (
     DescribeVpnConnectionAttributesRequest,
     DescribeVpnConnectionsRequest,
     DescribeVpnGatewayAttributesRequest,
+    DescribeVpnGatewaysRequest,
 )
 
 from mcp.types import CallToolResult, TextContent, ToolAnnotations
@@ -20,6 +21,7 @@ from .clients.models import (
     DescribeVpnGatewayAttributesResponse,
     DescribeVpnConnectionsResponse,
     DescribeVpnConnectionAttributesResponse,
+    DescribeVpnGatewaysResponse,
 )
 
 logging.basicConfig(
@@ -194,6 +196,62 @@ async def describe_vpn_connections(
         )
     except Exception as exc:
         logger.exception("Error calling describe_vpn_connections")
+        return CallToolResult(
+            isError=True,
+            content=[TextContent(type="text", text=f"查询失败：{exc}")],
+        )
+
+
+@mcp.tool(
+    name="describe_vpn_gateways",
+    description=(
+        '查询满足条件的VPN网关列表。\\n\\n示例：{"page_size":10}'
+    ),
+    annotations=ToolAnnotations(
+        title="Query VPN Gateways / 查询 VPN 网关列表",
+        read_only_hint=True,
+        idempotent_hint=True,
+        open_world_hint=True,
+    ),
+)
+async def describe_vpn_gateways(
+    page_number: int | None = None,
+    page_size: int | None = None,
+    ip_address: str | None = None,
+    ssl_enabled: bool | None = None,
+    subnet_id: str | None = None,
+    vpc_id: str | None = None,
+    vpn_gateway_name: str | None = None,
+    ipsec_enabled: bool | None = None,
+    project_name: str | None = None,
+    vpn_gateway_ids: list[str] | None = None,
+    tag_filters: list[dict] | None = None,
+    region: str | None = None,
+) -> DescribeVpnGatewaysResponse | CallToolResult:
+    req = DescribeVpnGatewaysRequest(
+        page_number=page_number,
+        page_size=page_size,
+        ip_address=ip_address,
+        ssl_enabled=ssl_enabled,
+        subnet_id=subnet_id,
+        vpc_id=vpc_id,
+        vpn_gateway_name=vpn_gateway_name,
+        ipsec_enabled=ipsec_enabled,
+        project_name=project_name,
+        vpn_gateway_ids=vpn_gateway_ids,
+        tag_filters=tag_filters,
+    )
+    try:
+        vpn_client = _get_vpn_client(region=region)
+        resp = vpn_client.describe_vpn_gateways(req)
+        return resp
+    except ValueError as exc:
+        return CallToolResult(
+            isError=True,
+            content=[TextContent(type="text", text=f"凭证缺失：{exc}")],
+        )
+    except Exception as exc:
+        logger.exception("Error calling describe_vpn_gateways")
         return CallToolResult(
             isError=True,
             content=[TextContent(type="text", text=f"查询失败：{exc}")],
