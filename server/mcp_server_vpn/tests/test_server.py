@@ -61,6 +61,8 @@ models_mod.DescribeSslVpnClientCertAttributesRequest = BaseReq
 models_mod.DescribeSslVpnClientCertAttributesResponse = Resp
 models_mod.DescribeSslVpnClientCertsRequest = BaseReq
 models_mod.DescribeSslVpnClientCertsResponse = Resp
+models_mod.DescribeSslVpnServersRequest = BaseReq
+models_mod.DescribeSslVpnServersResponse = Resp
 sys.modules['volcenginesdkcore'] = core
 sys.modules['volcenginesdkcore.rest'] = core.rest
 sys.modules['volcenginesdkvpn'] = vpn_mod
@@ -186,6 +188,14 @@ class StubClient:
         )
         return DescribeSslVpnClientCertsResponse(Message="ok")
 
+    def describe_ssl_vpn_servers(self, req):
+        if self.exc:
+            raise self.exc
+        from mcp_server_vpn.clients.models import (
+            DescribeSslVpnServersResponse,
+        )
+        return DescribeSslVpnServersResponse(Message="ok")
+
 
 def test_describe_vpn_connection_success(monkeypatch):
     monkeypatch.setattr(server, '_get_vpn_client', lambda region=None: StubClient())
@@ -290,4 +300,16 @@ def test_describe_ssl_vpn_client_certs_success(monkeypatch):
 def test_describe_ssl_vpn_client_certs_error(monkeypatch):
     monkeypatch.setattr(server, '_get_vpn_client', lambda region=None: StubClient(Exception('boom')))
     result = asyncio.run(server.describe_ssl_vpn_client_certs())
+    assert isinstance(result, CallToolResult) and result.isError
+
+
+def test_describe_ssl_vpn_servers_success(monkeypatch):
+    monkeypatch.setattr(server, '_get_vpn_client', lambda region=None: StubClient())
+    result = asyncio.run(server.describe_ssl_vpn_servers())
+    assert result.Message == 'ok'
+
+
+def test_describe_ssl_vpn_servers_error(monkeypatch):
+    monkeypatch.setattr(server, '_get_vpn_client', lambda region=None: StubClient(Exception('boom')))
+    result = asyncio.run(server.describe_ssl_vpn_servers())
     assert isinstance(result, CallToolResult) and result.isError

@@ -45,6 +45,11 @@ Skeleton MCP server for VPN related tools. Functionality will be added in future
 - **详细描述**：查询指定的 SSL 客户端证书详情。
 - **触发示例**：`"查看 SSL 客户端证书 vsc-123 的信息"`
 
+### `describe_ssl_vpn_servers`
+
+- **详细描述**：查询满足条件的 SSL 服务端列表。
+- **触发示例**：`"列出所有 SSL 服务端"`
+
 ## Installation
 
 ### System requirements
