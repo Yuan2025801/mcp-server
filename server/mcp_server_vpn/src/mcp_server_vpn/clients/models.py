@@ -39,3 +39,7 @@ class DescribeCustomerGatewaysResponse(BaseResponseModel):
 
 class DescribeSslVpnClientCertAttributesResponse(BaseResponseModel):
     pass
+
+
+class DescribeSslVpnClientCertsResponse(BaseResponseModel):
+    pass
