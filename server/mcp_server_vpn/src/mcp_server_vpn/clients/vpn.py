@@ -13,6 +13,7 @@ from volcenginesdkvpn.models import (
     DescribeVpnGatewayRoutesRequest,
     DescribeCustomerGatewaysRequest,
     DescribeSslVpnClientCertAttributesRequest,
+    DescribeSslVpnClientCertsRequest,
 )
 
 from .models import (
@@ -24,6 +25,7 @@ from .models import (
     DescribeVpnGatewayRoutesResponse,
     DescribeCustomerGatewaysResponse,
     DescribeSslVpnClientCertAttributesResponse,
+    DescribeSslVpnClientCertsResponse,
 )
 
 
@@ -130,3 +132,9 @@ class VPNClient:
             self.client.describe_ssl_vpn_client_cert_attributes, request
         )
         return self._wrap(resp, DescribeSslVpnClientCertAttributesResponse)
+
+    def describe_ssl_vpn_client_certs(
+        self, request: DescribeSslVpnClientCertsRequest
+    ) -> DescribeSslVpnClientCertsResponse:
+        resp = self._call(self.client.describe_ssl_vpn_client_certs, request)
+        return self._wrap(resp, DescribeSslVpnClientCertsResponse)
