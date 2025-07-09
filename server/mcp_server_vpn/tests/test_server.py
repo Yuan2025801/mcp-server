@@ -57,6 +57,8 @@ models_mod.DescribeVpnGatewayRoutesRequest = BaseReq
 models_mod.DescribeVpnGatewayRoutesResponse = Resp
 models_mod.DescribeCustomerGatewaysRequest = BaseReq
 models_mod.DescribeCustomerGatewaysResponse = Resp
+models_mod.DescribeSslVpnClientCertAttributesRequest = BaseReq
+models_mod.DescribeSslVpnClientCertAttributesResponse = Resp
 sys.modules['volcenginesdkcore'] = core
 sys.modules['volcenginesdkcore.rest'] = core.rest
 sys.modules['volcenginesdkvpn'] = vpn_mod
@@ -166,6 +168,14 @@ class StubClient:
         from mcp_server_vpn.clients.models import DescribeCustomerGatewaysResponse
         return DescribeCustomerGatewaysResponse(Message="ok")
 
+    def describe_ssl_vpn_client_cert_attributes(self, req):
+        if self.exc:
+            raise self.exc
+        from mcp_server_vpn.clients.models import (
+            DescribeSslVpnClientCertAttributesResponse,
+        )
+        return DescribeSslVpnClientCertAttributesResponse(Message="ok")
+
 
 def test_describe_vpn_connection_success(monkeypatch):
     monkeypatch.setattr(server, '_get_vpn_client', lambda region=None: StubClient())
@@ -246,4 +256,16 @@ def test_describe_customer_gateways_success(monkeypatch):
 def test_describe_customer_gateways_error(monkeypatch):
     monkeypatch.setattr(server, '_get_vpn_client', lambda region=None: StubClient(Exception('boom')))
     result = asyncio.run(server.describe_customer_gateways())
+    assert isinstance(result, CallToolResult) and result.isError
+
+
+def test_describe_ssl_vpn_client_cert_attributes_success(monkeypatch):
+    monkeypatch.setattr(server, '_get_vpn_client', lambda region=None: StubClient())
+    result = asyncio.run(server.describe_ssl_vpn_client_cert_attributes('id'))
+    assert result.Message == 'ok'
+
+
+def test_describe_ssl_vpn_client_cert_attributes_error(monkeypatch):
+    monkeypatch.setattr(server, '_get_vpn_client', lambda region=None: StubClient(Exception('boom')))
+    result = asyncio.run(server.describe_ssl_vpn_client_cert_attributes('id'))
     assert isinstance(result, CallToolResult) and result.isError
