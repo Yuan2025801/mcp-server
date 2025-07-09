@@ -14,6 +14,7 @@ from volcenginesdkvpn.models import (
     DescribeVpnGatewaysRequest,
     DescribeVpnGatewayRouteAttributesRequest,
     DescribeVpnGatewayRoutesRequest,
+    DescribeCustomerGatewaysRequest,
 )
 
 from mcp.types import CallToolResult, TextContent, ToolAnnotations
@@ -26,6 +27,7 @@ from .clients.models import (
     DescribeVpnGatewaysResponse,
     DescribeVpnGatewayRouteAttributesResponse,
     DescribeVpnGatewayRoutesResponse,
+    DescribeCustomerGatewaysResponse,
 )
 
 logging.basicConfig(
@@ -340,6 +342,56 @@ async def describe_vpn_gateways(
         )
     except Exception as exc:
         logger.exception("Error calling describe_vpn_gateways")
+        return CallToolResult(
+            isError=True,
+            content=[TextContent(type="text", text=f"查询失败：{exc}")],
+        )
+
+
+@mcp.tool(
+    name="describe_customer_gateways",
+    description=(
+        '查询满足条件的用户网关列表。\\n\\n示例：{"page_size":10}'
+    ),
+    annotations=ToolAnnotations(
+        title="Query Customer Gateways / 查询用户网关列表",
+        read_only_hint=True,
+        idempotent_hint=True,
+        open_world_hint=True,
+    ),
+)
+async def describe_customer_gateways(
+    page_number: int | None = None,
+    page_size: int | None = None,
+    customer_gateway_name: str | None = None,
+    ip_address: str | None = None,
+    status: str | None = None,
+    tag_filters: list[dict] | None = None,
+    project_name: str | None = None,
+    customer_gateway_ids: list[str] | None = None,
+    region: str | None = None,
+) -> DescribeCustomerGatewaysResponse | CallToolResult:
+    req = DescribeCustomerGatewaysRequest(
+        page_number=page_number,
+        page_size=page_size,
+        customer_gateway_name=customer_gateway_name,
+        ip_address=ip_address,
+        status=status,
+        tag_filters=tag_filters,
+        project_name=project_name,
+        customer_gateway_ids=customer_gateway_ids,
+    )
+    try:
+        vpn_client = _get_vpn_client(region=region)
+        resp = vpn_client.describe_customer_gateways(req)
+        return resp
+    except ValueError as exc:
+        return CallToolResult(
+            isError=True,
+            content=[TextContent(type="text", text=f"凭证缺失：{exc}")],
+        )
+    except Exception as exc:
+        logger.exception("Error calling describe_customer_gateways")
         return CallToolResult(
             isError=True,
             content=[TextContent(type="text", text=f"查询失败：{exc}")],
