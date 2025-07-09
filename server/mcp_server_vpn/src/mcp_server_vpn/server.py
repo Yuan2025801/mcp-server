@@ -15,6 +15,7 @@ from volcenginesdkvpn.models import (
     DescribeVpnGatewayRouteAttributesRequest,
     DescribeVpnGatewayRoutesRequest,
     DescribeCustomerGatewaysRequest,
+    DescribeSslVpnClientCertAttributesRequest,
 )
 
 from mcp.types import CallToolResult, TextContent, ToolAnnotations
@@ -28,6 +29,7 @@ from .clients.models import (
     DescribeVpnGatewayRouteAttributesResponse,
     DescribeVpnGatewayRoutesResponse,
     DescribeCustomerGatewaysResponse,
+    DescribeSslVpnClientCertAttributesResponse,
 )
 
 logging.basicConfig(
@@ -392,6 +394,42 @@ async def describe_customer_gateways(
         )
     except Exception as exc:
         logger.exception("Error calling describe_customer_gateways")
+        return CallToolResult(
+            isError=True,
+            content=[TextContent(type="text", text=f"查询失败：{exc}")],
+        )
+
+
+@mcp.tool(
+    name="describe_ssl_vpn_client_cert_attributes",
+    description=(
+        '查询指定的SSL客户端证书详情。\\n\\n示例：{"ssl_vpn_client_cert_id":"vsc-xxx","region":"cn-beijing"}'
+    ),
+    annotations=ToolAnnotations(
+        title="Query SSL VPN Client Cert / 查询 SSL VPN 客户端证书详情",
+        read_only_hint=True,
+        idempotent_hint=True,
+        open_world_hint=True,
+    ),
+)
+async def describe_ssl_vpn_client_cert_attributes(
+    ssl_vpn_client_cert_id: str,
+    region: str | None = None,
+) -> DescribeSslVpnClientCertAttributesResponse | CallToolResult:
+    req = DescribeSslVpnClientCertAttributesRequest(
+        ssl_vpn_client_cert_id=ssl_vpn_client_cert_id
+    )
+    try:
+        vpn_client = _get_vpn_client(region=region)
+        resp = vpn_client.describe_ssl_vpn_client_cert_attributes(req)
+        return resp
+    except ValueError as exc:
+        return CallToolResult(
+            isError=True,
+            content=[TextContent(type="text", text=f"凭证缺失：{exc}")],
+        )
+    except Exception as exc:
+        logger.exception("Error calling describe_ssl_vpn_client_cert_attributes")
         return CallToolResult(
             isError=True,
             content=[TextContent(type="text", text=f"查询失败：{exc}")],
