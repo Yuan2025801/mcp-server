@@ -17,6 +17,7 @@ from volcenginesdkvpn.models import (
     DescribeCustomerGatewaysRequest,
     DescribeSslVpnClientCertAttributesRequest,
     DescribeSslVpnClientCertsRequest,
+    DescribeSslVpnServersRequest,
 )
 
 from mcp.types import CallToolResult, TextContent, ToolAnnotations
@@ -32,6 +33,7 @@ from .clients.models import (
     DescribeCustomerGatewaysResponse,
     DescribeSslVpnClientCertAttributesResponse,
     DescribeSslVpnClientCertsResponse,
+    DescribeSslVpnServersResponse,
 )
 
 logging.basicConfig(
@@ -478,6 +480,52 @@ async def describe_ssl_vpn_client_certs(
         )
     except Exception as exc:
         logger.exception("Error calling describe_ssl_vpn_client_certs")
+        return CallToolResult(
+            isError=True,
+            content=[TextContent(type="text", text=f"查询失败：{exc}")],
+        )
+
+
+@mcp.tool(
+    name="describe_ssl_vpn_servers",
+    description='查询满足条件的SSL服务端列表。\\n\\n示例：{"page_size":20}',
+    annotations=ToolAnnotations(
+        title="Query SSL VPN Servers / 查询 SSL VPN 服务端列表",
+        read_only_hint=True,
+        idempotent_hint=True,
+        open_world_hint=True,
+    ),
+)
+async def describe_ssl_vpn_servers(
+    page_number: int | None = None,
+    page_size: int | None = None,
+    project_name: str | None = None,
+    tag_filters: list[dict] | None = None,
+    vpn_gateway_id: str | None = None,
+    ssl_vpn_server_name: str | None = None,
+    ssl_vpn_server_ids: list[str] | None = None,
+    region: str | None = None,
+) -> DescribeSslVpnServersResponse | CallToolResult:
+    req = DescribeSslVpnServersRequest(
+        page_number=page_number,
+        page_size=page_size,
+        project_name=project_name,
+        tag_filters=tag_filters,
+        vpn_gateway_id=vpn_gateway_id,
+        ssl_vpn_server_name=ssl_vpn_server_name,
+        ssl_vpn_server_ids=ssl_vpn_server_ids,
+    )
+    try:
+        vpn_client = _get_vpn_client(region=region)
+        resp = vpn_client.describe_ssl_vpn_servers(req)
+        return resp
+    except ValueError as exc:
+        return CallToolResult(
+            isError=True,
+            content=[TextContent(type="text", text=f"凭证缺失：{exc}")],
+        )
+    except Exception as exc:
+        logger.exception("Error calling describe_ssl_vpn_servers")
         return CallToolResult(
             isError=True,
             content=[TextContent(type="text", text=f"查询失败：{exc}")],
