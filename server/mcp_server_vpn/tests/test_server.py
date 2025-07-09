@@ -55,6 +55,8 @@ models_mod.DescribeVpnGatewayRouteAttributesRequest = BaseReq
 models_mod.DescribeVpnGatewayRouteAttributesResponse = Resp
 models_mod.DescribeVpnGatewayRoutesRequest = BaseReq
 models_mod.DescribeVpnGatewayRoutesResponse = Resp
+models_mod.DescribeCustomerGatewaysRequest = BaseReq
+models_mod.DescribeCustomerGatewaysResponse = Resp
 sys.modules['volcenginesdkcore'] = core
 sys.modules['volcenginesdkcore.rest'] = core.rest
 sys.modules['volcenginesdkvpn'] = vpn_mod
@@ -158,6 +160,12 @@ class StubClient:
         from mcp_server_vpn.clients.models import DescribeVpnGatewayRoutesResponse
         return DescribeVpnGatewayRoutesResponse(Message="ok")
 
+    def describe_customer_gateways(self, req):
+        if self.exc:
+            raise self.exc
+        from mcp_server_vpn.clients.models import DescribeCustomerGatewaysResponse
+        return DescribeCustomerGatewaysResponse(Message="ok")
+
 
 def test_describe_vpn_connection_success(monkeypatch):
     monkeypatch.setattr(server, '_get_vpn_client', lambda region=None: StubClient())
@@ -226,4 +234,16 @@ def test_describe_vpn_gateway_routes_success(monkeypatch):
 def test_describe_vpn_gateway_routes_error(monkeypatch):
     monkeypatch.setattr(server, '_get_vpn_client', lambda region=None: StubClient(Exception('boom')))
     result = asyncio.run(server.describe_vpn_gateway_routes())
+    assert isinstance(result, CallToolResult) and result.isError
+
+
+def test_describe_customer_gateways_success(monkeypatch):
+    monkeypatch.setattr(server, '_get_vpn_client', lambda region=None: StubClient())
+    result = asyncio.run(server.describe_customer_gateways())
+    assert result.Message == 'ok'
+
+
+def test_describe_customer_gateways_error(monkeypatch):
+    monkeypatch.setattr(server, '_get_vpn_client', lambda region=None: StubClient(Exception('boom')))
+    result = asyncio.run(server.describe_customer_gateways())
     assert isinstance(result, CallToolResult) and result.isError
