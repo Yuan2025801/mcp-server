@@ -9,6 +9,18 @@ from mcp.server.session import ServerSession
 from starlette.requests import Request
 
 from mcp.types import CallToolResult, TextContent, ToolAnnotations
+from volcenginesdkvpn.models import (
+    DescribeVpnConnectionAttributesRequest,
+    DescribeVpnConnectionsRequest,
+    DescribeVpnGatewayAttributesRequest,
+    DescribeVpnGatewaysRequest,
+    DescribeVpnGatewayRouteAttributesRequest,
+    DescribeVpnGatewayRoutesRequest,
+    DescribeCustomerGatewaysRequest,
+    DescribeSslVpnClientCertAttributesRequest,
+    DescribeSslVpnClientCertsRequest,
+    DescribeSslVpnServersRequest,
+)
 
 from .clients import VPNClient
 from .clients.models import (
@@ -103,11 +115,12 @@ async def describe_vpn_connection(
     vpn_connection_id: str,
     region: str | None = None,
 ) -> DescribeVpnConnectionAttributesResponse | CallToolResult:
+    req = DescribeVpnConnectionAttributesRequest(
+        vpn_connection_id=vpn_connection_id
+    )
     try:
         vpn_client = _get_vpn_client(region=region)
-        resp = vpn_client.describe_vpn_connection_attributes(
-            vpn_connection_id=vpn_connection_id
-        )
+        resp = vpn_client.describe_vpn_connection_attributes(req)
         return resp
     except ValueError as exc:
         return CallToolResult(
@@ -138,11 +151,10 @@ async def describe_vpn_gateway(
     vpn_gateway_id: str,
     region: str | None = None,
 ) -> DescribeVpnGatewayAttributesResponse | CallToolResult:
+    req = DescribeVpnGatewayAttributesRequest(vpn_gateway_id=vpn_gateway_id)
     try:
         vpn_client = _get_vpn_client(region=region)
-        resp = vpn_client.describe_vpn_gateway_attributes(
-            vpn_gateway_id=vpn_gateway_id
-        )
+        resp = vpn_client.describe_vpn_gateway_attributes(req)
         return resp
     except ValueError as exc:
         return CallToolResult(
@@ -173,11 +185,12 @@ async def describe_vpn_gateway_route(
     vpn_gateway_route_id: str,
     region: str | None = None,
 ) -> DescribeVpnGatewayRouteAttributesResponse | CallToolResult:
+    req = DescribeVpnGatewayRouteAttributesRequest(
+        vpn_gateway_route_id=vpn_gateway_route_id
+    )
     try:
         vpn_client = _get_vpn_client(region=region)
-        resp = vpn_client.describe_vpn_gateway_route_attributes(
-            vpn_gateway_route_id=vpn_gateway_route_id
-        )
+        resp = vpn_client.describe_vpn_gateway_route_attributes(req)
         return resp
     except ValueError as exc:
         return CallToolResult(
@@ -215,18 +228,19 @@ async def describe_vpn_gateway_routes(
     vpn_gateway_route_ids: list[str] | None = None,
     region: str | None = None,
 ) -> DescribeVpnGatewayRoutesResponse | CallToolResult:
+    req = DescribeVpnGatewayRoutesRequest(
+        page_number=page_number,
+        page_size=page_size,
+        destination_cidr_block=destination_cidr_block,
+        next_hop_id=next_hop_id,
+        route_type=route_type,
+        status=status,
+        vpn_gateway_id=vpn_gateway_id,
+        vpn_gateway_route_ids=vpn_gateway_route_ids,
+    )
     try:
         vpn_client = _get_vpn_client(region=region)
-        resp = vpn_client.describe_vpn_gateway_routes(
-            page_number=page_number,
-            page_size=page_size,
-            destination_cidr_block=destination_cidr_block,
-            next_hop_id=next_hop_id,
-            route_type=route_type,
-            status=status,
-            vpn_gateway_id=vpn_gateway_id,
-            vpn_gateway_route_ids=vpn_gateway_route_ids,
-        )
+        resp = vpn_client.describe_vpn_gateway_routes(req)
         return resp
     except ValueError as exc:
         return CallToolResult(
@@ -261,15 +275,16 @@ async def describe_vpn_connections(
     status: str | None = None,
     region: str | None = None,
 ) -> DescribeVpnConnectionsResponse | CallToolResult:
+    req = DescribeVpnConnectionsRequest(
+        page_number=page_number,
+        page_size=page_size,
+        vpn_gateway_id=vpn_gateway_id,
+        vpn_connection_name=vpn_connection_name,
+        status=status,
+    )
     try:
         vpn_client = _get_vpn_client(region=region)
-        resp = vpn_client.describe_vpn_connections(
-            page_number=page_number,
-            page_size=page_size,
-            vpn_gateway_id=vpn_gateway_id,
-            vpn_connection_name=vpn_connection_name,
-            status=status,
-        )
+        resp = vpn_client.describe_vpn_connections(req)
         return resp
     except ValueError as exc:
         return CallToolResult(
@@ -310,21 +325,22 @@ async def describe_vpn_gateways(
     tag_filters: list[dict] | None = None,
     region: str | None = None,
 ) -> DescribeVpnGatewaysResponse | CallToolResult:
+    req = DescribeVpnGatewaysRequest(
+        page_number=page_number,
+        page_size=page_size,
+        ip_address=ip_address,
+        ssl_enabled=ssl_enabled,
+        subnet_id=subnet_id,
+        vpc_id=vpc_id,
+        vpn_gateway_name=vpn_gateway_name,
+        ipsec_enabled=ipsec_enabled,
+        project_name=project_name,
+        vpn_gateway_ids=vpn_gateway_ids,
+        tag_filters=tag_filters,
+    )
     try:
         vpn_client = _get_vpn_client(region=region)
-        resp = vpn_client.describe_vpn_gateways(
-            page_number=page_number,
-            page_size=page_size,
-            ip_address=ip_address,
-            ssl_enabled=ssl_enabled,
-            subnet_id=subnet_id,
-            vpc_id=vpc_id,
-            vpn_gateway_name=vpn_gateway_name,
-            ipsec_enabled=ipsec_enabled,
-            project_name=project_name,
-            vpn_gateway_ids=vpn_gateway_ids,
-            tag_filters=tag_filters,
-        )
+        resp = vpn_client.describe_vpn_gateways(req)
         return resp
     except ValueError as exc:
         return CallToolResult(
@@ -362,18 +378,19 @@ async def describe_customer_gateways(
     customer_gateway_ids: list[str] | None = None,
     region: str | None = None,
 ) -> DescribeCustomerGatewaysResponse | CallToolResult:
+    req = DescribeCustomerGatewaysRequest(
+        page_number=page_number,
+        page_size=page_size,
+        customer_gateway_name=customer_gateway_name,
+        ip_address=ip_address,
+        status=status,
+        tag_filters=tag_filters,
+        project_name=project_name,
+        customer_gateway_ids=customer_gateway_ids,
+    )
     try:
         vpn_client = _get_vpn_client(region=region)
-        resp = vpn_client.describe_customer_gateways(
-            page_number=page_number,
-            page_size=page_size,
-            customer_gateway_name=customer_gateway_name,
-            ip_address=ip_address,
-            status=status,
-            tag_filters=tag_filters,
-            project_name=project_name,
-            customer_gateway_ids=customer_gateway_ids,
-        )
+        resp = vpn_client.describe_customer_gateways(req)
         return resp
     except ValueError as exc:
         return CallToolResult(
@@ -404,11 +421,12 @@ async def describe_ssl_vpn_client_cert_attributes(
     ssl_vpn_client_cert_id: str,
     region: str | None = None,
 ) -> DescribeSslVpnClientCertAttributesResponse | CallToolResult:
+    req = DescribeSslVpnClientCertAttributesRequest(
+        ssl_vpn_client_cert_id=ssl_vpn_client_cert_id
+    )
     try:
         vpn_client = _get_vpn_client(region=region)
-        resp = vpn_client.describe_ssl_vpn_client_cert_attributes(
-            ssl_vpn_client_cert_id=ssl_vpn_client_cert_id
-        )
+        resp = vpn_client.describe_ssl_vpn_client_cert_attributes(req)
         return resp
     except ValueError as exc:
         return CallToolResult(
@@ -444,16 +462,17 @@ async def describe_ssl_vpn_client_certs(
     tag_filters: list[dict] | None = None,
     region: str | None = None,
 ) -> DescribeSslVpnClientCertsResponse | CallToolResult:
+    req = DescribeSslVpnClientCertsRequest(
+        page_number=page_number,
+        page_size=page_size,
+        ssl_vpn_client_cert_ids=ssl_vpn_client_cert_ids,
+        ssl_vpn_client_cert_name=ssl_vpn_client_cert_name,
+        ssl_vpn_server_id=ssl_vpn_server_id,
+        tag_filters=tag_filters,
+    )
     try:
         vpn_client = _get_vpn_client(region=region)
-        resp = vpn_client.describe_ssl_vpn_client_certs(
-            page_number=page_number,
-            page_size=page_size,
-            ssl_vpn_client_cert_ids=ssl_vpn_client_cert_ids,
-            ssl_vpn_client_cert_name=ssl_vpn_client_cert_name,
-            ssl_vpn_server_id=ssl_vpn_server_id,
-            tag_filters=tag_filters,
-        )
+        resp = vpn_client.describe_ssl_vpn_client_certs(req)
         return resp
     except ValueError as exc:
         return CallToolResult(
@@ -488,17 +507,18 @@ async def describe_ssl_vpn_servers(
     ssl_vpn_server_ids: list[str] | None = None,
     region: str | None = None,
 ) -> DescribeSslVpnServersResponse | CallToolResult:
+    req = DescribeSslVpnServersRequest(
+        page_number=page_number,
+        page_size=page_size,
+        project_name=project_name,
+        tag_filters=tag_filters,
+        vpn_gateway_id=vpn_gateway_id,
+        ssl_vpn_server_name=ssl_vpn_server_name,
+        ssl_vpn_server_ids=ssl_vpn_server_ids,
+    )
     try:
         vpn_client = _get_vpn_client(region=region)
-        resp = vpn_client.describe_ssl_vpn_servers(
-            page_number=page_number,
-            page_size=page_size,
-            project_name=project_name,
-            tag_filters=tag_filters,
-            vpn_gateway_id=vpn_gateway_id,
-            ssl_vpn_server_name=ssl_vpn_server_name,
-            ssl_vpn_server_ids=ssl_vpn_server_ids,
-        )
+        resp = vpn_client.describe_ssl_vpn_servers(req)
         return resp
     except ValueError as exc:
         return CallToolResult(

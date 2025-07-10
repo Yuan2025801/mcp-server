@@ -1,6 +1,17 @@
 from volcengine.ApiInfo import ApiInfo
 
-from typing import Any
+from volcenginesdkvpn.models import (
+    DescribeVpnConnectionAttributesRequest,
+    DescribeVpnConnectionsRequest,
+    DescribeVpnGatewayAttributesRequest,
+    DescribeVpnGatewaysRequest,
+    DescribeVpnGatewayRouteAttributesRequest,
+    DescribeVpnGatewayRoutesRequest,
+    DescribeCustomerGatewaysRequest,
+    DescribeSslVpnClientCertAttributesRequest,
+    DescribeSslVpnClientCertsRequest,
+    DescribeSslVpnServersRequest,
+)
 
 from .base import BaseApi
 from .models import (
@@ -98,173 +109,71 @@ class VPNClient(BaseApi):
 
 
     def describe_vpn_connection_attributes(
-        self, vpn_connection_id: str
+        self, request: DescribeVpnConnectionAttributesRequest
     ) -> DescribeVpnConnectionAttributesResponse:
-        params = {"VpnConnectionId": vpn_connection_id}
+        params = self.to_params(request)
         data = self.get("DescribeVpnConnectionAttributes", params)
         return DescribeVpnConnectionAttributesResponse(**data)
 
     def describe_vpn_gateway_attributes(
-        self, vpn_gateway_id: str
+        self, request: DescribeVpnGatewayAttributesRequest
     ) -> DescribeVpnGatewayAttributesResponse:
-        params = {"VpnGatewayId": vpn_gateway_id}
+        params = self.to_params(request)
         data = self.get("DescribeVpnGatewayAttributes", params)
         return DescribeVpnGatewayAttributesResponse(**data)
 
     def describe_vpn_connections(
-        self,
-        page_number: int | None = None,
-        page_size: int | None = None,
-        vpn_gateway_id: str | None = None,
-        vpn_connection_name: str | None = None,
-        status: str | None = None,
+        self, request: DescribeVpnConnectionsRequest
     ) -> DescribeVpnConnectionsResponse:
-        raw_params: dict[str, Any] = {
-            "PageNumber": page_number,
-            "PageSize": page_size,
-            "VpnGatewayId": vpn_gateway_id,
-            "VpnConnectionName": vpn_connection_name,
-            "Status": status,
-        }
-        params = {k: v for k, v in raw_params.items() if v is not None}
+        params = self.to_params(request)
         data = self.get("DescribeVpnConnections", params)
         return DescribeVpnConnectionsResponse(**data)
 
     def describe_vpn_gateways(
-        self,
-        page_number: int | None = None,
-        page_size: int | None = None,
-        ip_address: str | None = None,
-        ssl_enabled: bool | None = None,
-        subnet_id: str | None = None,
-        vpc_id: str | None = None,
-        vpn_gateway_name: str | None = None,
-        ipsec_enabled: bool | None = None,
-        project_name: str | None = None,
-        vpn_gateway_ids: list[str] | None = None,
-        tag_filters: list[dict] | None = None,
+        self, request: DescribeVpnGatewaysRequest
     ) -> DescribeVpnGatewaysResponse:
-        raw_params: dict[str, Any] = {
-            "PageNumber": page_number,
-            "PageSize": page_size,
-            "IpAddress": ip_address,
-            "SslEnabled": ssl_enabled,
-            "SubnetId": subnet_id,
-            "VpcId": vpc_id,
-            "VpnGatewayName": vpn_gateway_name,
-            "IpsecEnabled": ipsec_enabled,
-            "ProjectName": project_name,
-            "VpnGatewayIds": vpn_gateway_ids,
-            "TagFilters": tag_filters,
-        }
-        params = {k: v for k, v in raw_params.items() if v is not None}
+        params = self.to_params(request)
         data = self.get("DescribeVpnGateways", params)
         return DescribeVpnGatewaysResponse(**data)
 
     def describe_vpn_gateway_route_attributes(
-        self, vpn_gateway_route_id: str
+        self, request: DescribeVpnGatewayRouteAttributesRequest
     ) -> DescribeVpnGatewayRouteAttributesResponse:
-        params = {"VpnGatewayRouteId": vpn_gateway_route_id}
+        params = self.to_params(request)
         data = self.get("DescribeVpnGatewayRouteAttributes", params)
         return DescribeVpnGatewayRouteAttributesResponse(**data)
 
     def describe_vpn_gateway_routes(
-        self,
-        page_number: int | None = None,
-        page_size: int | None = None,
-        destination_cidr_block: str | None = None,
-        next_hop_id: str | None = None,
-        route_type: str | None = None,
-        status: str | None = None,
-        vpn_gateway_id: str | None = None,
-        vpn_gateway_route_ids: list[str] | None = None,
+        self, request: DescribeVpnGatewayRoutesRequest
     ) -> DescribeVpnGatewayRoutesResponse:
-        raw_params: dict[str, Any] = {
-            "PageNumber": page_number,
-            "PageSize": page_size,
-            "DestinationCidrBlock": destination_cidr_block,
-            "NextHopId": next_hop_id,
-            "RouteType": route_type,
-            "Status": status,
-            "VpnGatewayId": vpn_gateway_id,
-            "VpnGatewayRouteIds": vpn_gateway_route_ids,
-        }
-        params = {k: v for k, v in raw_params.items() if v is not None}
+        params = self.to_params(request)
         data = self.get("DescribeVpnGatewayRoutes", params)
         return DescribeVpnGatewayRoutesResponse(**data)
 
     def describe_customer_gateways(
-        self,
-        page_number: int | None = None,
-        page_size: int | None = None,
-        customer_gateway_name: str | None = None,
-        ip_address: str | None = None,
-        status: str | None = None,
-        tag_filters: list[dict] | None = None,
-        project_name: str | None = None,
-        customer_gateway_ids: list[str] | None = None,
+        self, request: DescribeCustomerGatewaysRequest
     ) -> DescribeCustomerGatewaysResponse:
-        raw_params: dict[str, Any] = {
-            "PageNumber": page_number,
-            "PageSize": page_size,
-            "CustomerGatewayName": customer_gateway_name,
-            "IpAddress": ip_address,
-            "Status": status,
-            "TagFilters": tag_filters,
-            "ProjectName": project_name,
-            "CustomerGatewayIds": customer_gateway_ids,
-        }
-        params = {k: v for k, v in raw_params.items() if v is not None}
+        params = self.to_params(request)
         data = self.get("DescribeCustomerGateways", params)
         return DescribeCustomerGatewaysResponse(**data)
 
     def describe_ssl_vpn_client_cert_attributes(
-        self, ssl_vpn_client_cert_id: str
+        self, request: DescribeSslVpnClientCertAttributesRequest
     ) -> DescribeSslVpnClientCertAttributesResponse:
-        params = {"SslVpnClientCertId": ssl_vpn_client_cert_id}
+        params = self.to_params(request)
         data = self.get("DescribeSslVpnClientCertAttributes", params)
         return DescribeSslVpnClientCertAttributesResponse(**data)
 
     def describe_ssl_vpn_client_certs(
-        self,
-        page_number: int | None = None,
-        page_size: int | None = None,
-        ssl_vpn_client_cert_ids: list[str] | None = None,
-        ssl_vpn_client_cert_name: str | None = None,
-        ssl_vpn_server_id: str | None = None,
-        tag_filters: list[dict] | None = None,
+        self, request: DescribeSslVpnClientCertsRequest
     ) -> DescribeSslVpnClientCertsResponse:
-        raw_params: dict[str, Any] = {
-            "PageNumber": page_number,
-            "PageSize": page_size,
-            "SslVpnClientCertIds": ssl_vpn_client_cert_ids,
-            "SslVpnClientCertName": ssl_vpn_client_cert_name,
-            "SslVpnServerId": ssl_vpn_server_id,
-            "TagFilters": tag_filters,
-        }
-        params = {k: v for k, v in raw_params.items() if v is not None}
+        params = self.to_params(request)
         data = self.get("DescribeSslVpnClientCerts", params)
         return DescribeSslVpnClientCertsResponse(**data)
 
     def describe_ssl_vpn_servers(
-        self,
-        page_number: int | None = None,
-        page_size: int | None = None,
-        project_name: str | None = None,
-        tag_filters: list[dict] | None = None,
-        vpn_gateway_id: str | None = None,
-        ssl_vpn_server_name: str | None = None,
-        ssl_vpn_server_ids: list[str] | None = None,
+        self, request: DescribeSslVpnServersRequest
     ) -> DescribeSslVpnServersResponse:
-        raw_params: dict[str, Any] = {
-            "PageNumber": page_number,
-            "PageSize": page_size,
-            "ProjectName": project_name,
-            "TagFilters": tag_filters,
-            "VpnGatewayId": vpn_gateway_id,
-            "SslVpnServerName": ssl_vpn_server_name,
-            "SslVpnServerIds": ssl_vpn_server_ids,
-        }
-        params = {k: v for k, v in raw_params.items() if v is not None}
+        params = self.to_params(request)
         data = self.get("DescribeSslVpnServers", params)
         return DescribeSslVpnServersResponse(**data)

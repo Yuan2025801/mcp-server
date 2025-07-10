@@ -36,6 +36,19 @@ class BaseApi(Service.Service):
         self.api_info = api_info
         Service.Service.__init__(self, self.service_info, self.api_info)
 
+    @staticmethod
+    def to_params(obj: Any) -> dict[str, Any]:
+        """Convert a request model to a parameters dict, dropping None values."""
+        if hasattr(obj, "to_dict"):
+            data = obj.to_dict()
+        elif hasattr(obj, "model_dump"):
+            data = obj.model_dump()
+        elif isinstance(obj, dict):
+            data = obj
+        else:
+            data = getattr(obj, "__dict__", {})
+        return {k: v for k, v in data.items() if v is not None}
+
     def get(self, action, params, doseq=0):
         res = super(BaseApi, self).get(action, params, doseq)
         try:
