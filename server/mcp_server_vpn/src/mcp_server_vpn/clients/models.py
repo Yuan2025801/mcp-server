@@ -1,12 +1,19 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+from pydantic.version import VERSION
 
 
 class BaseResponseModel(BaseModel):
     """Generic response model allowing extra fields."""
 
-    class Config:
-        extra = "allow"
-        arbitrary_types_allowed = True
+    if VERSION.startswith("2"):
+        model_config = ConfigDict(
+            extra="allow",
+            arbitrary_types_allowed=True,
+        )
+    else:
+        class Config:
+            extra = "allow"
+            arbitrary_types_allowed = True
 
 
 class DescribeVpnConnectionAttributesResponse(BaseResponseModel):
