@@ -105,7 +105,7 @@ class VPNClient(BaseApi):
             ),
         }
         self.region = region
-        super().__init__(region, endpoint, api_infos, "vpc", ak, sk)
+        super().__init__(region, endpoint, api_infos, "vpn", ak, sk)
 
 
     def describe_vpn_connection_attributes(
