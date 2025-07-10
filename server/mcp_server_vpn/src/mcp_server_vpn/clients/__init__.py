@@ -1,3 +1,4 @@
+from .base import BaseApi
 from .vpn import VPNClient
 from .models import (
     DescribeVpnConnectionAttributesResponse,
@@ -8,6 +9,7 @@ from .models import (
 )
 
 __all__ = [
+    "BaseApi",
     "VPNClient",
     "DescribeVpnConnectionAttributesResponse",
     "DescribeVpnGatewayAttributesResponse",

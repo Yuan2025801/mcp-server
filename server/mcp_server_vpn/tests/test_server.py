@@ -32,43 +32,60 @@ class DummyApi: pass
 
 
 vpn_api_mod.VPNApi = DummyApi
-models_mod = types.ModuleType('volcenginesdkvpn.models')
-
-
-class Resp: pass
-
-
-class BaseReq:
-    def __init__(self, **kwargs):
-        pass
-
-
-models_mod.DescribeVpnConnectionAttributesRequest = BaseReq
-models_mod.DescribeVpnConnectionAttributesResponse = Resp
-models_mod.DescribeVpnConnectionsRequest = BaseReq
-models_mod.DescribeVpnConnectionsResponse = Resp
-models_mod.DescribeVpnGatewayAttributesRequest = BaseReq
-models_mod.DescribeVpnGatewayAttributesResponse = Resp
-models_mod.DescribeVpnGatewaysRequest = BaseReq
-models_mod.DescribeVpnGatewaysResponse = Resp
-models_mod.DescribeVpnGatewayRouteAttributesRequest = BaseReq
-models_mod.DescribeVpnGatewayRouteAttributesResponse = Resp
-models_mod.DescribeVpnGatewayRoutesRequest = BaseReq
-models_mod.DescribeVpnGatewayRoutesResponse = Resp
-models_mod.DescribeCustomerGatewaysRequest = BaseReq
-models_mod.DescribeCustomerGatewaysResponse = Resp
-models_mod.DescribeSslVpnClientCertAttributesRequest = BaseReq
-models_mod.DescribeSslVpnClientCertAttributesResponse = Resp
-models_mod.DescribeSslVpnClientCertsRequest = BaseReq
-models_mod.DescribeSslVpnClientCertsResponse = Resp
-models_mod.DescribeSslVpnServersRequest = BaseReq
-models_mod.DescribeSslVpnServersResponse = Resp
 sys.modules['volcenginesdkcore'] = core
 sys.modules['volcenginesdkcore.rest'] = core.rest
 sys.modules['volcenginesdkvpn'] = vpn_mod
 sys.modules['volcenginesdkvpn.api'] = types.ModuleType('api')
 sys.modules['volcenginesdkvpn.api.vpn_api'] = vpn_api_mod
-sys.modules['volcenginesdkvpn.models'] = models_mod
+
+# Stub old volcengine modules used by BaseApi
+ve_mod = types.ModuleType('volcengine')
+api_info_mod = types.ModuleType('volcengine.ApiInfo')
+
+class DummyApiInfo:
+    def __init__(self, *a, **kw):
+        pass
+
+api_info_mod.ApiInfo = DummyApiInfo
+
+credentials_mod = types.ModuleType('volcengine.Credentials')
+
+class DummyCreds:
+    def __init__(self, *a, **kw):
+        pass
+
+credentials_mod.Credentials = DummyCreds
+
+service_info_mod = types.ModuleType('volcengine.ServiceInfo')
+
+class DummyServiceInfo:
+    def __init__(self, *a, **kw):
+        pass
+
+service_info_mod.ServiceInfo = DummyServiceInfo
+
+base_service_mod = types.ModuleType('volcengine.base.Service')
+
+class DummyBaseService:
+    def __init__(self, *a, **kw):
+        pass
+
+    def get(self, *a, **kw):
+        return '{}'
+
+base_service_mod.Service = DummyBaseService
+base_mod = types.ModuleType('volcengine.base')
+base_mod.Service = base_service_mod
+
+ve_mod.Credentials = credentials_mod
+ve_mod.ServiceInfo = service_info_mod
+
+sys.modules['volcengine'] = ve_mod
+sys.modules['volcengine.ApiInfo'] = api_info_mod
+sys.modules['volcengine.Credentials'] = credentials_mod
+sys.modules['volcengine.ServiceInfo'] = service_info_mod
+sys.modules['volcengine.base'] = base_mod
+sys.modules['volcengine.base.Service'] = base_service_mod
 
 # Dummy mcp modules
 mcp_fastmcp = types.ModuleType('mcp.server.fastmcp')
@@ -140,19 +157,19 @@ class StubClient:
     def __init__(self, exc: Exception | None = None):
         self.exc = exc
 
-    def describe_vpn_connection_attributes(self, req):
+    def describe_vpn_connection_attributes(self, **kwargs):
         if self.exc:
             raise self.exc
         from mcp_server_vpn.clients.models import DescribeVpnConnectionAttributesResponse
         return DescribeVpnConnectionAttributesResponse(Message="ok")
 
-    def describe_vpn_gateways(self, req):
+    def describe_vpn_gateways(self, **kwargs):
         if self.exc:
             raise self.exc
         from mcp_server_vpn.clients.models import DescribeVpnGatewaysResponse
         return DescribeVpnGatewaysResponse(Message="ok")
 
-    def describe_vpn_gateway_route_attributes(self, req):
+    def describe_vpn_gateway_route_attributes(self, **kwargs):
         if self.exc:
             raise self.exc
         from mcp_server_vpn.clients.models import (
@@ -160,19 +177,19 @@ class StubClient:
         )
         return DescribeVpnGatewayRouteAttributesResponse(Message="ok")
 
-    def describe_vpn_gateway_routes(self, req):
+    def describe_vpn_gateway_routes(self, **kwargs):
         if self.exc:
             raise self.exc
         from mcp_server_vpn.clients.models import DescribeVpnGatewayRoutesResponse
         return DescribeVpnGatewayRoutesResponse(Message="ok")
 
-    def describe_customer_gateways(self, req):
+    def describe_customer_gateways(self, **kwargs):
         if self.exc:
             raise self.exc
         from mcp_server_vpn.clients.models import DescribeCustomerGatewaysResponse
         return DescribeCustomerGatewaysResponse(Message="ok")
 
-    def describe_ssl_vpn_client_cert_attributes(self, req):
+    def describe_ssl_vpn_client_cert_attributes(self, **kwargs):
         if self.exc:
             raise self.exc
         from mcp_server_vpn.clients.models import (
@@ -180,7 +197,7 @@ class StubClient:
         )
         return DescribeSslVpnClientCertAttributesResponse(Message="ok")
 
-    def describe_ssl_vpn_client_certs(self, req):
+    def describe_ssl_vpn_client_certs(self, **kwargs):
         if self.exc:
             raise self.exc
         from mcp_server_vpn.clients.models import (
@@ -188,7 +205,7 @@ class StubClient:
         )
         return DescribeSslVpnClientCertsResponse(Message="ok")
 
-    def describe_ssl_vpn_servers(self, req):
+    def describe_ssl_vpn_servers(self, **kwargs):
         if self.exc:
             raise self.exc
         from mcp_server_vpn.clients.models import (
