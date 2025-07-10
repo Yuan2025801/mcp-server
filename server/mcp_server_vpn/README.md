@@ -1,54 +1,27 @@
 # VPN MCP Server
 
-Skeleton MCP server for VPN related tools. Functionality will be added in future versions.
+| Version | v1.0.0 |
+| ------- | ------ |
+| Description | Manage VPN gateways and IPsec connections using natural language |
+| Category | Networking |
+
+The VPN MCP Server enables natural language access to Volcengine VPN resources, including gateways, connections and SSL VPN servers.
 
 ## Tools
 
-### `describe_vpn_connection`
+- `describe_vpn_connection`：查询指定的 IPsec 连接详情。
+- `describe_vpn_gateway`：查询指定的 VPN 网关详情。
+- `describe_vpn_connections`：查询满足条件的 IPsec 连接列表。
+- `describe_vpn_gateways`：查询满足条件的 VPN 网关列表。
+- `describe_vpn_gateway_route`：查询指定的 VPN 网关路由条目详情。
+- `describe_vpn_gateway_routes`：查询满足条件的 VPN 网关路由条目列表。
+- `describe_customer_gateways`：查询满足条件的用户网关列表。
+- `describe_ssl_vpn_client_cert_attributes`：查询指定的 SSL 客户端证书详情。
+- `describe_ssl_vpn_servers`：查询满足条件的 SSL 服务端列表。
 
-- **详细描述**：查询指定的 IPsec 连接详情。
-- **触发示例**：`"查看 IPsec 连接 vpn-123 的状态"`
+## Compatible Platforms
 
-
-### `describe_vpn_gateway`
-
-- **详细描述**：查询指定的 VPN 网关详情。
-- **触发示例**：`"查看 VPN 网关 vgw-123 的状态"`
-
-### `describe_vpn_connections`
-
-- **详细描述**：查询满足条件的 IPsec 连接列表。
-- **触发示例**：`"列出所有 IPsec 连接"`
-
-### `describe_vpn_gateways`
-
-- **详细描述**：查询满足条件的 VPN 网关列表。
-- **触发示例**：`"列出所有 VPN 网关"`
-
-### `describe_vpn_gateway_route`
-
-- **详细描述**：查询指定的 VPN 网关路由条目详情。
-- **触发示例**：`"查看 VPN 网关路由 vgr-123 的配置"`
-
-### `describe_vpn_gateway_routes`
-
-- **详细描述**：查询满足条件的 VPN 网关路由条目列表。
-- **触发示例**：`"列出 VPN 网关 vgw-123 的路由"`
-
-### `describe_customer_gateways`
-
-- **详细描述**：查询满足条件的用户网关列表。
-- **触发示例**：`"列出所有用户网关"`
-
-### `describe_ssl_vpn_client_cert_attributes`
-
-- **详细描述**：查询指定的 SSL 客户端证书详情。
-- **触发示例**：`"查看 SSL 客户端证书 vsc-123 的信息"`
-
-### `describe_ssl_vpn_servers`
-
-- **详细描述**：查询满足条件的 SSL 服务端列表。
-- **触发示例**：`"列出所有 SSL 服务端"`
+This server can be used with Ark, Cursor, Claude Desktop and any other MCP client that supports custom servers.
 
 ## Installation
 
@@ -79,40 +52,6 @@ To use SSE transport:
 uv run mcp-server-vpn -t sse
 ```
 
-## Debugging (Command Line)
-
-The following steps demonstrate how to simulate APIG using MCP Inspector and verify the server:
-
-1. Install [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector).
-
-2. Prepare STS information in the JSON structure below and convert it to a base64 string:
-
-```json
-{
-  "CurrentTime": "2021-04-12T10:57:09+08:00",
-  "ExpiredTime": "2021-04-12T11:57:09+08:00",
-  "AccessKeyId": "ak",
-  "SecretAccessKey": "sk",
-  "SessionToken": ""
-}
-```
-
-3. Start the server in **STDIO mode**. The script below sets the base64 `authorization` environment variable and launches the server via MCP Inspector:
-
-```bash
-#!/usr/bin/env bash
-auth_json='{"AccessKeyId":"ak","SecretAccessKey":"sk","SessionToken":""}'
-export authorization=$(echo -n "$auth_json" | base64)
-npx @modelcontextprotocol/inspector \
-  python -m mcp_server_vpn.main -t stdio
-```
-
-4. For **SSE mode**, run the inspector and the server separately:
-
-```bash
-npx @modelcontextprotocol/inspector sleep 9999
-uv run mcp-server-vpn -t sse
-```
 
 ## MCP Integration
 
