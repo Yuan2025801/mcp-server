@@ -70,6 +70,55 @@ sys.modules['volcenginesdkvpn.api'] = types.ModuleType('api')
 sys.modules['volcenginesdkvpn.api.vpn_api'] = vpn_api_mod
 sys.modules['volcenginesdkvpn.models'] = models_mod
 
+# Stub old volcengine modules used by BaseApi
+ve_mod = types.ModuleType('volcengine')
+api_info_mod = types.ModuleType('volcengine.ApiInfo')
+
+class DummyApiInfo:
+    def __init__(self, *a, **kw):
+        pass
+
+api_info_mod.ApiInfo = DummyApiInfo
+
+credentials_mod = types.ModuleType('volcengine.Credentials')
+
+class DummyCreds:
+    def __init__(self, *a, **kw):
+        pass
+
+credentials_mod.Credentials = DummyCreds
+
+service_info_mod = types.ModuleType('volcengine.ServiceInfo')
+
+class DummyServiceInfo:
+    def __init__(self, *a, **kw):
+        pass
+
+service_info_mod.ServiceInfo = DummyServiceInfo
+
+base_service_mod = types.ModuleType('volcengine.base.Service')
+
+class DummyBaseService:
+    def __init__(self, *a, **kw):
+        pass
+
+    def get(self, *a, **kw):
+        return '{}'
+
+base_service_mod.Service = DummyBaseService
+base_mod = types.ModuleType('volcengine.base')
+base_mod.Service = base_service_mod
+
+ve_mod.Credentials = credentials_mod
+ve_mod.ServiceInfo = service_info_mod
+
+sys.modules['volcengine'] = ve_mod
+sys.modules['volcengine.ApiInfo'] = api_info_mod
+sys.modules['volcengine.Credentials'] = credentials_mod
+sys.modules['volcengine.ServiceInfo'] = service_info_mod
+sys.modules['volcengine.base'] = base_mod
+sys.modules['volcengine.base.Service'] = base_service_mod
+
 # Dummy mcp modules
 mcp_fastmcp = types.ModuleType('mcp.server.fastmcp')
 

@@ -7,6 +7,8 @@ import os
 from mcp.server.fastmcp import Context, FastMCP
 from mcp.server.session import ServerSession
 from starlette.requests import Request
+
+from mcp.types import CallToolResult, TextContent, ToolAnnotations
 from volcenginesdkvpn.models import (
     DescribeVpnConnectionAttributesRequest,
     DescribeVpnConnectionsRequest,
@@ -19,8 +21,6 @@ from volcenginesdkvpn.models import (
     DescribeSslVpnClientCertsRequest,
     DescribeSslVpnServersRequest,
 )
-
-from mcp.types import CallToolResult, TextContent, ToolAnnotations
 
 from .clients import VPNClient
 from .clients.models import (
@@ -73,7 +73,6 @@ def _get_vpn_client(region: str | None = None) -> VPNClient:
 
     ak = creds.get("AccessKeyId") or os.getenv("VOLCENGINE_ACCESS_KEY")
     sk = creds.get("SecretAccessKey") or os.getenv("VOLCENGINE_SECRET_KEY")
-    session_token = creds.get("SessionToken") or os.getenv("VOLCENGINE_SESSION_TOKEN")
     region = region or os.getenv("VOLCENGINE_REGION")
     host = os.getenv("VOLCENGINE_ENDPOINT")
     if not ak or not sk or not region:
@@ -89,14 +88,12 @@ def _get_vpn_client(region: str | None = None) -> VPNClient:
 
     client = _CLIENT_CACHE.get(key)
     if client is None:
+        endpoint = host or "open.volcengineapi.com"
         client = VPNClient(
             region=region,
+            endpoint=endpoint,
             ak=ak,
             sk=sk,
-            host=host,
-            session_token=session_token,
-            timeout=5,
-            max_retries=3,
         )
         _CLIENT_CACHE[key] = client
     return client
@@ -118,7 +115,9 @@ async def describe_vpn_connection(
     vpn_connection_id: str,
     region: str | None = None,
 ) -> DescribeVpnConnectionAttributesResponse | CallToolResult:
-    req = DescribeVpnConnectionAttributesRequest(vpn_connection_id=vpn_connection_id)
+    req = DescribeVpnConnectionAttributesRequest(
+        vpn_connection_id=vpn_connection_id
+    )
     try:
         vpn_client = _get_vpn_client(region=region)
         resp = vpn_client.describe_vpn_connection_attributes(req)
@@ -186,7 +185,9 @@ async def describe_vpn_gateway_route(
     vpn_gateway_route_id: str,
     region: str | None = None,
 ) -> DescribeVpnGatewayRouteAttributesResponse | CallToolResult:
-    req = DescribeVpnGatewayRouteAttributesRequest(vpn_gateway_route_id=vpn_gateway_route_id)
+    req = DescribeVpnGatewayRouteAttributesRequest(
+        vpn_gateway_route_id=vpn_gateway_route_id
+    )
     try:
         vpn_client = _get_vpn_client(region=region)
         resp = vpn_client.describe_vpn_gateway_route_attributes(req)
