@@ -68,8 +68,8 @@ typing-inspection==0.4.0
     #   pydantic
     #   pydantic-settings
 urllib3==2.4.0
-    # via volcengine-python-sdk
-uvicorn==0.34.2
+    # via volcengine
+uvicorn==0.34.3
     # via mcp
-volcengine-python-sdk==3.0.1
+volcengine==1.0.101
     # via mcp-server-vpn (pyproject.toml)

@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "mcp>=1.9.0",
-    "volcengine-python-sdk>=3.0.1",
+    "volcengine>=1.0.101",
 ]
 
 [project.scripts]
