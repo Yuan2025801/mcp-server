@@ -38,7 +38,14 @@ class BaseApi(Service.Service):
 
     @staticmethod
     def to_params(obj: Any) -> dict[str, Any]:
-        """Convert a request model to a parameters dict, dropping None values."""
+        """Convert a request model to a parameters dict, dropping None values.
+
+        ``volcengine-python-sdk`` request models expose ``attribute_map``
+        describing how Python attribute names map to request parameter keys. This
+        helper applies that mapping so that callers can use snake_case attribute
+        names while the API receives the expected camel case keys.
+        """
+
         if hasattr(obj, "to_dict"):
             data = obj.to_dict()
         elif hasattr(obj, "model_dump"):
@@ -47,6 +54,11 @@ class BaseApi(Service.Service):
             data = obj
         else:
             data = getattr(obj, "__dict__", {})
+
+        attr_map = getattr(obj, "attribute_map", None)
+        if isinstance(attr_map, dict):
+            data = {attr_map.get(k, k): v for k, v in data.items()}
+
         return {k: v for k, v in data.items() if v is not None}
 
     def get(self, action, params, doseq=0):
