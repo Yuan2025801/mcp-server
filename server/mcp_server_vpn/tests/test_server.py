@@ -248,13 +248,13 @@ class StubClient:
 
 def test_describe_vpn_connection_success(monkeypatch):
     monkeypatch.setattr(server, '_get_vpn_client', lambda region=None: StubClient())
-    result = asyncio.run(server.describe_vpn_connection('id'))
+    result = asyncio.run(server.describe_vpn_connection_attributes('id'))
     assert result.Message == 'ok'
 
 
 def test_describe_vpn_connection_error(monkeypatch):
     monkeypatch.setattr(server, '_get_vpn_client', lambda region=None: StubClient(Exception('boom')))
-    result = asyncio.run(server.describe_vpn_connection('id'))
+    result = asyncio.run(server.describe_vpn_connection_attributes('id'))
     assert isinstance(result, CallToolResult) and result.isError
 
 
@@ -276,7 +276,7 @@ def test_get_vpn_client_missing_vars(monkeypatch):
 
 def test_describe_vpn_connection_missing_creds(monkeypatch):
     monkeypatch.setattr(server, '_get_vpn_client', lambda region=None: (_ for _ in ()).throw(ValueError('Missing required credentials')))
-    result = asyncio.run(server.describe_vpn_connection('id'))
+    result = asyncio.run(server.describe_vpn_connection_attributes('id'))
     assert isinstance(result, CallToolResult) and result.isError
 
 
@@ -294,13 +294,13 @@ def test_describe_vpn_gateways_error(monkeypatch):
 
 def test_describe_vpn_gateway_route_success(monkeypatch):
     monkeypatch.setattr(server, '_get_vpn_client', lambda region=None: StubClient())
-    result = asyncio.run(server.describe_vpn_gateway_route('id'))
+    result = asyncio.run(server.describe_vpn_gateway_route_attributes('id'))
     assert result.Message == 'ok'
 
 
 def test_describe_vpn_gateway_route_error(monkeypatch):
     monkeypatch.setattr(server, '_get_vpn_client', lambda region=None: StubClient(Exception('boom')))
-    result = asyncio.run(server.describe_vpn_gateway_route('id'))
+    result = asyncio.run(server.describe_vpn_gateway_route_attributes('id'))
     assert isinstance(result, CallToolResult) and result.isError
 
 
